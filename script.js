@@ -1470,7 +1470,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(document.getElementById('homePetName')) document.getElementById('homePetName').textContent = p.pet_name || 'N/A';
             if(document.getElementById('homePetId')) document.getElementById('homePetId').textContent = '2024-' + (p.id ? p.id.slice(0,5) : 'XXXXX');
             if(document.getElementById('homePetBreed')) document.getElementById('homePetBreed').textContent = p.breed || 'N/A';
-            if(document.getElementById('homePetBirthday')) document.getElementById('homePetBirthday').textContent = p.age ? p.age + ' years old' : 'N/A';
+            if(document.getElementById('homePetBirthday')) document.getElementById('homePetBirthday').textContent = p.age ? p.age == 1 ? p.age + ' year old' : p.age + ' years old' : 'N/A';
             if(document.getElementById('homeOwnerName')) document.getElementById('homeOwnerName').textContent = p.owner_name || 'N/A';
             if(document.getElementById('homeOwnerPhone')) document.getElementById('homeOwnerPhone').textContent = p.owner_contact || 'N/A';
             if(document.getElementById('homeOwnerEmail')) document.getElementById('homeOwnerEmail').textContent = p.owner_email || 'N/A';
