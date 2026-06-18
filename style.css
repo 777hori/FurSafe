@@ -2170,3 +2170,302 @@ body {
 .nav-links a:hover i, .notification-icon:hover {
     animation: softPulse 1s infinite;
 }
+
+
+/* ============================================================
+   DARK MODE — COMPREHENSIVE FIX
+   Covers every hardcoded white / light background across all pages
+   ============================================================ */
+
+/* ── Core card overrides (the base .card uses a hardcoded gradient) ── */
+body.dark-mode .card {
+  background: #2a2a2a !important;
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+/* ── Ambient background animation in dark mode ── */
+body.dark-mode {
+  background: linear-gradient(-45deg, #1a1a1a, #1f1f1f, #222222, #1a1a1a) !important;
+  background-size: 400% 400% !important;
+  animation: ambientDrift 20s ease infinite !important;
+}
+
+/* ── Navbar ── */
+body.dark-mode .nav-links {
+  background-color: #2d2d2d;
+}
+body.dark-mode .nav-link.active,
+body.dark-mode .nav-link:hover {
+  background-color: #1a1a1a;
+}
+
+/* ── Notification dropdown ── */
+body.dark-mode .notification-dropdown {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+body.dark-mode .notif-header {
+  background-color: #333;
+}
+body.dark-mode .notif-item {
+  border-bottom-color: #444;
+}
+
+/* ── HOME PAGE ── */
+/* Pet info card wrapper */
+body.dark-mode .pet-card.card,
+body.dark-mode .home-grid .card {
+  background: #2a2a2a !important;
+}
+
+/* Announcements panel (right column on home) */
+body.dark-mode .announcements-panel,
+body.dark-mode .right-panel,
+body.dark-mode .home-grid > .card {
+  background: #2a2a2a !important;
+}
+
+/* Happening Meow section items */
+body.dark-mode .happening-item {
+  background: #2d2d2d !important;
+  border-color: #3a3a3a !important;
+}
+body.dark-mode .event-item {
+  background-color: transparent;
+}
+
+/* ── REGISTRATION PAGE ── */
+body.dark-mode .form-card.card,
+body.dark-mode .register-container .card {
+  background: #2a2a2a !important;
+}
+body.dark-mode .photo-upload {
+  background-color: #2d2d2d;
+  border-color: #555;
+  color: var(--text-light);
+}
+body.dark-mode .vac-btn {
+  background-color: #333;
+  border-color: #555;
+  color: #aaa;
+}
+body.dark-mode .vac-btn.active-vac {
+  background-color: #1a4a40;
+  color: #A3E4D7;
+  border-color: #A3E4D7;
+}
+body.dark-mode input[type="date"] {
+  background-color: #333333;
+  color: #f0f0f0;
+  border-color: #555555;
+}
+body.dark-mode .checkbox-label {
+  color: #f0f0f0;
+}
+body.dark-mode .checkbox-label input[type="checkbox"] {
+  background-color: #333;
+  border-color: #555;
+}
+
+/* ── PET PROFILE / PAWSPORT PAGE ── */
+/* Main white wrapper card */
+body.dark-mode .profile-container .card,
+body.dark-mode .profile-top,
+body.dark-mode .profile-right,
+body.dark-mode .pet-profile-card {
+  background: #2a2a2a !important;
+}
+/* Read-only input fields on pet profile */
+body.dark-mode .profile-input-group input {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+  color: #f0f0f0 !important;
+}
+/* Pawsport card (vaccination record) */
+body.dark-mode .pawsport-card {
+  background-color: #2a1f0e !important;
+  border-color: var(--primary) !important;
+}
+body.dark-mode .vaccine-item {
+  background-color: #2d2d2d !important;
+  border-color: #3a3a3a;
+}
+body.dark-mode .last-visit-banner {
+  background-color: #2d2d2d;
+}
+body.dark-mode .btn-edit-profile {
+  background-color: transparent !important;
+  color: var(--primary);
+}
+/* Pet dropdown selector bar */
+body.dark-mode .pet-selector-bar,
+body.dark-mode select.pet-select {
+  background-color: #2d2d2d;
+  border-color: #555;
+  color: #f0f0f0;
+}
+
+/* ── COMMUNITY PAGE ── */
+/* Left sidebar stats */
+body.dark-mode .stats-card.card,
+body.dark-mode .community-layout .card {
+  background: #2a2a2a !important;
+}
+body.dark-mode .stat-row {
+  background-color: #333;
+}
+body.dark-mode .stats-title {
+  border-color: #f0f0f0;
+  color: #f0f0f0;
+}
+/* Post composer */
+body.dark-mode .post-input-container {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+}
+body.dark-mode .post-input-container input {
+  color: #f0f0f0;
+  background: transparent;
+}
+/* Post cards */
+body.dark-mode .post-card.card {
+  background: #2a2a2a !important;
+}
+body.dark-mode .post-actions {
+  border-top-color: #444;
+}
+body.dark-mode .action-btn {
+  color: #f0f0f0;
+}
+/* Right sidebar search + hashtags */
+body.dark-mode .search-container {
+  border-color: #555;
+  background-color: #2d2d2d;
+}
+body.dark-mode .search-container input {
+  background-color: transparent;
+  color: #f0f0f0;
+}
+body.dark-mode .hashtag-desc {
+  color: #aaa;
+}
+body.dark-mode .right-sidebar .card {
+  background: #2a2a2a !important;
+}
+body.dark-mode .left-sidebar .card {
+  background: #2a2a2a !important;
+}
+
+/* ── SERVICES PAGE ── */
+/* Clinic list cards */
+body.dark-mode .clinic-card {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+}
+body.dark-mode .clinic-card:hover {
+  border-color: var(--primary) !important;
+}
+body.dark-mode .clinic-name {
+  color: #f0f0f0;
+}
+/* Search bar */
+body.dark-mode .search-bar {
+  background-color: #2d2d2d;
+  border-color: var(--primary);
+}
+body.dark-mode .search-bar input {
+  background-color: transparent;
+  color: #f0f0f0;
+}
+/* Map header */
+body.dark-mode .map-header {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+}
+body.dark-mode .map-header h2 {
+  color: #f0f0f0;
+}
+/* Clinic detail card (below map) */
+body.dark-mode .clinic-details-card {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+}
+body.dark-mode .clinic-details-card h3,
+body.dark-mode .detail-item label,
+body.dark-mode .detail-item p {
+  color: #f0f0f0;
+}
+/* Services left panel wrapper */
+body.dark-mode .services-layout > .card,
+body.dark-mode .services-left {
+  background: #2a2a2a !important;
+}
+
+/* ── SETTINGS PAGE ── */
+body.dark-mode .settings-card {
+  background-color: #2a2a2a !important;
+  border-color: #3a3a3a;
+}
+body.dark-mode .settings-footer {
+  border-top-color: #444;
+}
+body.dark-mode .settings-input-group input,
+body.dark-mode .settings-input-group select {
+  background-color: #333 !important;
+  border-color: #555 !important;
+  color: #f0f0f0 !important;
+}
+body.dark-mode .btn-cancel {
+  background-color: #333;
+  border-color: #555;
+  color: #f0f0f0;
+}
+body.dark-mode .photo-upload-dashed {
+  border-color: var(--primary);
+  background-color: #2d2d2d;
+}
+body.dark-mode .theme-card {
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+/* ── MODAL ── */
+body.dark-mode .modal-content {
+  background-color: #2d2d2d !important;
+  color: #f0f0f0;
+}
+body.dark-mode .modal-content input,
+body.dark-mode .modal-content select,
+body.dark-mode .modal-content textarea {
+  background-color: #333;
+  border-color: #555;
+  color: #f0f0f0;
+}
+
+/* ── LOGIN PAGE ── */
+body.dark-mode .login-layout,
+body.dark-mode .login-right,
+body.dark-mode .login-card-container,
+body.dark-mode .login-right-section {
+  background-color: #2d2d2d !important;
+}
+body.dark-mode .login-logo {
+  color: #f0f0f0;
+}
+
+/* ── DIVIDERS & MISC ── */
+body.dark-mode .divider-horizontal {
+  background-color: #3a3a3a;
+}
+body.dark-mode .login-divider {
+  background-color: #3a3a3a;
+}
+body.dark-mode .photo-upload-box {
+  background-color: #2d2d2d;
+  border-color: var(--primary);
+}
+body.dark-mode .team-card {
+  background-color: #2a2a2a;
+}
+
