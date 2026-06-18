@@ -592,49 +592,50 @@ label {
             padding-bottom: 50px;
         }
 
-        .team-card {
-            background-color: #fcefcb;
-            border-radius: var(--border-radius-lg);
-            padding: 0 15px 20px 15px;
-            position: relative;
-            margin-top: 50px;         
-            display: flex;             
-            flex-direction: column;   
-            align-items: center;     
+       .team-card {
+    background-color: #fcefcb;
+    border-radius: var(--border-radius-lg);
+    padding: 0 15px 20px 15px;
+    position: relative;
+    margin-top: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+    padding-top: 90px;
 }
 
         .team-avatar {
-            width: 130px;
-            height: 130px;
-            background-color: var(--primary);
-            border-radius: 50%;
-            transform: translateY(-30%);  
-            border: 5px solid var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
+    width: 160px;
+    height: 160px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    border: 5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
     box-shadow: 0 10px 20px rgba(240, 165, 0, 0.3);
-            position: relative;
-        }
+    position: relative;
+}
 
         .team-info {
-            margin-top: -25px;  
-            text-align: center;
-        }
-
+    margin-top: 0;
+    text-align: center;
+}
         .avatar-img {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);  
-            width: 150px;                       
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            z-index: 2;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-        }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 200px;
+    height: 230px;
+    border-radius: 50% 50% 0 0;
+    object-fit: cover;
+    object-position: center top;
+    z-index: 2;
+}
         .team-name {
             font-weight: 800;
             font-size: 1rem;
