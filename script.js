@@ -143,24 +143,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. UI LOGIC (MODALS, DROPDOWNS, MAP)
     // ==========================================
     
-    // Terms & Privacy Modal
+// Terms & Privacy Modals (Separated)
     const termsModal = document.getElementById('termsModal');
+    const privacyModal = document.getElementById('privacyModal');
     const termsLink = document.getElementById('termsLink');
     const privacyLink = document.getElementById('privacyLink');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const closePrivacyModalBtn = document.getElementById('closePrivacyModalBtn');
 
-    function openModal(e) {
+    // Terms Functions
+    function openTermsModal(e) {
         if(e) e.preventDefault();
         if(termsModal) termsModal.classList.add('active');
     }
-    
-    function closeModal() {
+    function closeTermsModal() {
         if(termsModal) termsModal.classList.remove('active');
     }
 
-    if(termsLink) termsLink.addEventListener('click', openModal);
-    if(privacyLink) privacyLink.addEventListener('click', openModal);
-    if(closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    // Privacy Functions
+    function openPrivacyModal(e) {
+        if(e) e.preventDefault();
+        if(privacyModal) privacyModal.classList.add('active');
+    }
+    function closePrivacyModal() {
+        if(privacyModal) privacyModal.classList.remove('active');
+    }
+
+    // Event Listeners
+    if(termsLink) termsLink.addEventListener('click', openTermsModal);
+    if(closeModalBtn) closeModalBtn.addEventListener('click', closeTermsModal);
+
+    if(privacyLink) privacyLink.addEventListener('click', openPrivacyModal);
+    if(closePrivacyModalBtn) closePrivacyModalBtn.addEventListener('click', closePrivacyModal);
+
+    // Click outside to close either modal
+    window.addEventListener('click', (e) => {
+        if (e.target === termsModal) closeTermsModal();
+        if (e.target === privacyModal) closePrivacyModal();
+    });
 
     // Notification Dropdown
     const notificationBtn = document.getElementById('notificationBtn');
