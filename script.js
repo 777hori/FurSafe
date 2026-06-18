@@ -2318,9 +2318,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Age Auto Calculation based on June 19, 2026
-    const petDOB = document.getElementById('petDOB');
-    const petAge = document.getElementById('petAge');
-    if (petDOB && petAge) {
+        const petDOB = document.getElementById('petDOB');
+        const petAge = document.getElementById('petAge');
+        petDOB.max = new Date().toISOString().split('T')[0]; // ← ADD THIS LINE
+        if (petDOB && petAge) {
         petDOB.addEventListener('change', () => {
             if (!petDOB.value) {
                 petAge.value = '';
