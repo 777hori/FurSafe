@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurSafe Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="adminstyle.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- PET VIEW MODAL -->
+    <div class="modal-overlay" id="petViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pet Details</h2>
+                <button class="modal-close" id="closePetModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="pet-detail-top">
+                    <div class="pet-detail-photo" id="modalPetPhoto">
+                        <i class="fa-solid fa-paw" style="font-size:3rem; color:var(--primary);"></i>
+                    </div>
+                    <div class="pet-detail-info">
+                        <h3 id="modalPetName">--</h3>
+                        <p id="modalPetBreed">--</p>
+                        <div class="modal-badges">
+                            <span class="badge" id="modalPetStatus">--</span>
+                            <span class="badge" id="modalPetVac">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="pet-detail-grid">
+                    <div class="detail-item"><span class="detail-label">Species</span><span id="modalPetSpecies">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Breed</span><span id="modalPetBreedDetail">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Age</span><span id="modalPetAge">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Weight</span><span id="modalPetWeight">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Sex</span><span id="modalPetSex">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Color/Markings</span><span id="modalPetColor">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Neutered</span><span id="modalPetNeutered">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Owner</span><span id="modalPetOwner">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Owner Email</span><span id="modalPetOwnerEmail">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Owner Contact</span><span id="modalPetOwnerContact">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Owner Address</span><span id="modalPetOwnerAddress">--</span></div>
+                    <div class="detail-item"><span class="detail-label">Registered</span><span id="modalPetRegistered">--</span></div>
+                </div>
+                <div class="vaccine-section">
+                    <h4>Vaccination Records</h4>
+                    <div class="vaccine-grid" id="modalVaccineGrid">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-approve" id="modalApproveBtn"><i class="fa-solid fa-check"></i> Approve</button>
+                    <button class="btn-reject" id="modalRejectBtn"><i class="fa-solid fa-xmark"></i> Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PROFILE EDIT MODAL -->
+    <div class="modal-overlay" id="profileEditModal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="modal-close" id="closeProfileModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-edit-avatar-section">
+                    <div class="profile-edit-avatar" id="profileEditAvatar">
+                        <i class="fa-solid fa-user" style="font-size:2rem; color:#999;"></i>
+                    </div>
+                    <label for="avatarFileInput" class="btn-upload"><i class="fa-solid fa-camera"></i> Change Photo</label>
+                    <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                </div>
+                <div class="profile-edit-fields">
+                    <label for="profileEditName">Display Name</label>
+                    <input type="text" id="profileEditName" class="ann-input letters-only" placeholder="Your display name">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button class="btn btn-secondary" id="cancelProfileEdit">Cancel</button>
+                    <button class="btn btn-primary" id="saveProfileEdit">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-paw"></i> FurSafe
+            </div>
+            
+            <div class="admin-profile" id="adminProfileArea" style="cursor:pointer;" title="Click to edit profile">
+                <div class="admin-avatar" id="sidebarAvatar"></div>
+                <div class="admin-name" id="sidebarAdminName">Loading...</div>
+                <div class="admin-badge">Admin</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="pet-registration">
+                    <i class="fa-solid fa-paw"></i> Pet Registration
+                </a>
+                <a href="#" class="nav-item" data-target="pet-owners">
+                    <i class="fa-solid fa-user-group"></i> Pet owners
+                </a>
+                <a href="#" class="nav-item" data-target="announcements">
+                    <i class="fa-solid fa-bullhorn"></i> Announcements
+                </a>
+                <a href="#" class="nav-item" data-target="reported-posts">
+                    <i class="fa-solid fa-flag"></i> Reported posts
+                </a>
+                <a href="#" class="nav-item" data-target="reports">
+                    <i class="fa-solid fa-chart-simple"></i> Reports
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-title">
+                    <i class="fa-solid fa-border-all" id="headerIcon"></i> 
+                    <h1 id="headerText">Dashboard</h1>
+                </div>
+            </header>
+
+            <div class="views-container">
+                
+                <!-- DASHBOARD VIEW -->
+                <section id="view-dashboard" class="admin-view active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-title">Total pets registered</div>
+                            <div class="stat-value" id="dashTotalPets">0</div>
+                            <div class="stat-subtext" id="dashTotalPetsSub">+0 this month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Vaccinated pets</div>
+                            <div class="stat-value" id="dashVacPets">0</div>
+                            <div class="stat-subtext" id="dashVacPetsSub">0% of total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Pending approval</div>
+                            <div class="stat-value" id="dashPendingPets">0</div>
+                            <div class="stat-subtext">Needs review</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Reported posts</div>
+                            <div class="stat-value" id="dashReportedPosts">0</div>
+                            <div class="stat-subtext">Unresolved</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-mid-grid">
+                        <div class="dashboard-card">
+                            <h3 class="card-title">Recent pet registrations</h3>
+                            <div class="recent-pets-list" id="dashRecentPets"></div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="card-title">Monthly registration</h3>
+                            <div class="chart-container">
+                                <canvas id="monthlyRegistrationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-bot-grid">
+                        <div class="dashboard-card event-log-card">
+                            <h3 class="card-title">Recent activities</h3>
+                            <div class="event-log-list" id="dashEventLogs"></div>
+                        </div>
+                        <div class="dashboard-card breakdown-card">
+                            <h3 class="card-title">Pet type breakdown</h3>
+                            <div class="chart-container-donut">
+                                <canvas id="petTypeDonutChart"></canvas>
+                            </div>
+                            <div class="breakdown-legend" id="dashBreakdownLegend"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PET REGISTRATION VIEW -->
+                <section id="view-pet-registration" class="admin-view">
+                    <div class="filter-bar">
+                        <input type="text" class="search-input" id="petSearch" placeholder="Search by pet name or..">
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="All">All</button>
+                            <button class="filter-btn" data-filter="Pending">Pending</button>
+                            <button class="filter-btn" data-filter="Approval">Approved</button>
+                            <button class="filter-btn" data-filter="Rejected">Rejected</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>PET NAME<br><span style="font-size:0.8rem;font-weight:normal;color:var(--text-light)">OWNER</span></th>
+                                    <th>TYPE</th>
+                                    <th>STATUS</th>
+                                    <th>VACCINATION</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="petRegistrationTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- PET OWNERS VIEW -->
+                <section id="view-pet-owners" class="admin-view">
+                    <div class="dashboard-card full-width">
+                        <h3 class="card-title" style="color:var(--primary); font-size:1.4rem;">Recently Registered Pet Owners</h3>
+                        <div class="pet-owners-list" id="petOwnersList"></div>
+                    </div>
+                </section>
+
+                <!-- ANNOUNCEMENTS VIEW -->
+                <section id="view-announcements" class="admin-view">
+                    <div class="create-announcement-box" id="createAnnouncementBtn">
+                        <i class="fa-solid fa-plus" style="color:var(--primary); font-size:1.2rem; margin-right:10px;"></i>
+                        <span style="font-weight:600;">Create new announcement for Barangay 21...</span>
+                    </div>
+
+                    <div class="create-announcement-form" id="createAnnouncementForm" style="display:none; margin-bottom: 20px;">
+                        <input type="text" id="annTitle" placeholder="Announcement Title" class="ann-input">
+                        <textarea id="annContent" placeholder="Write your announcement details here..." class="ann-input" rows="4"></textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                            <button class="btn btn-secondary" id="cancelAnnBtn">Cancel</button>
+                            <button class="btn btn-primary" id="postAnnBtn">Post</button>
+                        </div>
+                    </div>
+
+                    <div class="announcements-feed" id="announcementsFeed"></div>
+                </section>
+
+                <!-- REPORTED POSTS VIEW -->
+                <section id="view-reported-posts" class="admin-view">
+                    <div class="toggle-container" style="margin-bottom: 20px;">
+                        <button class="pill-btn active">Unresolved</button>
+                    </div>
+                    <div class="reported-posts-list" id="reportedPostsList"></div>
+                </section>
+
+                <!-- REPORTS VIEW -->
+                <section id="view-reports" class="admin-view">
+                    <div class="stats-grid" id="reportsStatsGrid"></div>
+
+                    <div class="dashboard-card full-width" style="margin-top: 20px;">
+                        <h3 class="card-title" style="color:var(--primary);">Pet type breakdown</h3>
+                        <div class="progress-bar-list" id="reportsPetBreakdown"></div>
+                    </div>
+
+                    <div class="dashboard-card full-width" style="margin-top: 20px;">
+                        <h3 class="card-title" style="color:var(--primary);">Vaccination rates</h3>
+                        <div class="progress-bar-list" id="reportsVacBreakdown"></div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="adminscript.js?v=3"></script>
+</body>
+</html>

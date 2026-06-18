@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurSafe</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS for OpenFreeMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- ======================= LOGIN PAGE ======================= -->
+    <section id="login-page" class="app-page active">
+        <div class="login-container">
+            <div class="login-layout">
+                <div class="login-left">
+                    <h1>Protect your pet.</h1>
+                    <h2>Support your Community.</h2>
+                    <h3>Register now.</h3>
+                    
+                    <!-- EDIT HERE: Put the actual pet image inside here -->
+                   <div class="login-image-placeholder">
+                    <img src="bgimages/Frame 6.png" alt="Pet Image">
+                </div>
+                </div> <!-- ← CLOSE .login-left HERE -->
+
+                <div class="login-divider"></div>
+
+                <div class="login-right">
+                    <div class="login-card">
+                        <div class="login-logo">
+                            <i class="fa-solid fa-paw"></i> FurSafe
+                        </div>
+                        <h2 class="welcome-text">WELCOME BACK!</h2>
+                        <p class="welcome-subtext">LOG IN TO YOUR ACCOUNT</p>
+
+                        <form id="loginForm">
+                            <div id="loginFields">
+                                <div class="form-group">
+                                    <label for="brgyId">LOG IN WITH YOUR BARANGGAY ID</label>
+                                    <input type="text" id="brgyId" placeholder="e.g. 2024-POSXI-9209" required>
+                                    <div class="error-message" id="brgyIdError">Invalid format. Only letters, numbers, and hyphens allowed.</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">PASSWORD</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="password" placeholder="Enter your Password" required>
+                                        <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2; font-size: 1rem; min-width: 18px; min-height: 18px; display: block;"></i>
+                                    </div>
+                                </div>
+
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="termsCheck" required>
+                                    <label for="termsCheck" style="font-weight: normal; margin:0;">I agree to the <a id="termsLink" href="#">Terms of Service</a> and <a id="privacyLink" href="#">Privacy Policy</a>.</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="rememberMe">
+                                    <label for="rememberMe" style="font-weight: normal; margin:0;">Remember my Account</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block mt-3" id="loginSubmitBtn">LOG IN</button>
+                                <a href="#" class="forgot-password" id="forgotPasswordLink">FORGOT PASSWORD</a>
+                                
+                                <div class="or-divider">OR</div>
+
+                                <button type="button" class="btn btn-secondary btn-block mb-2" id="showSignUpBtn">SIGN UP WITH BRGY I.D</button>
+                                <button type="button" class="btn btn-outline btn-block mb-2" id="adminToggleBtn">ARE YOU AN OFFICIAL FROM BARANGGAY?</button>
+                            </div>
+
+                            <div id="signUpFields" style="display: none;">
+                                <div class="form-group">
+                                    <label>FIRST NAME</label>
+                                    <input type="text" id="signupFirstName" class="no-digits" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>LAST NAME</label>
+                                    <input type="text" id="signupLastName" class="no-digits" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>EMAIL ADDRESS</label>
+                                    <input type="email" id="signupEmail" required>
+                                    <div class="error-message" id="emailError">Invalid email. Please use @gmail.com, @yahoo.com, or @outlook.com.</div>
+                                </div>
+                                <div class="form-group">
+                                    <label>BARANGGAY ID</label>
+                                    <input type="text" id="signupBrgyId" placeholder="e.g. 2024-POSXI-9209" required>
+                                    <div class="error-message" id="signupBrgyIdError">Invalid format. e.g. 2024-POSXI-9209</div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-block mt-3" id="signUpSubmitBtn">SIGN UP</button>
+                                <button type="button" class="btn btn-outline btn-block mt-2" id="backToLoginBtn">BACK TO LOGIN</button>
+                            </div>
+
+                            <!-- ADMIN LOGIN FIELDS (hidden by default) -->
+                            <div id="adminLoginFields" style="display: none;">
+                                <div class="admin-login-badge">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>ADMIN ACCESS</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminId">ADMIN ID</label>
+                                    <input type="text" id="adminId" placeholder="e.g. ADMIN-BRGY21-001" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminPassword">PASSWORD</label>
+                                    <div style="position: relative;">
+                                        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                                        <i class="fa-solid fa-eye-slash" id="toggleAdminPassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2;"></i>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-block mt-3" id="adminLoginSubmitBtn">SIGN IN AS ADMIN</button>
+                                <button type="button" class="btn btn-outline btn-block mt-2" id="backFromAdminBtn">BACK TO USER LOGIN</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ======================= MAIN APP ======================= -->
+    <section id="app-container" class="app-page">
+        <div class="container">
+            <!-- GLOBAL NAVBAR -->
+                <nav class="navbar">
+                <div class="logo">
+                    <i class="fa-solid fa-paw"></i> FurSafe
+                </div>
+                <div class="nav-links">
+                    <a href="#" class="nav-link active" data-route="home"><i class="fa-solid fa-house"></i> HOME</a>
+                    <a href="#" class="nav-link" data-route="register"><i class="fa-solid fa-pen-nib"></i> REGISTER</a>
+                    <a href="#" class="nav-link" data-route="services"><i class="fa-solid fa-list-ul"></i> SERVICES</a>
+                    <a href="#" class="nav-link" data-route="community"><i class="fa-solid fa-users"></i> COMMUNITY</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="#" class="icon-btn" data-route="about"><i class="fa-solid fa-question"></i></a>
+                    <button class="icon-btn" id="notificationBtn"><i class="fa-solid fa-bell"></i></button>
+                    <a href="#" class="icon-btn" data-route="settings"><i class="fa-solid fa-gear"></i></a>
+                    <a href="#" class="icon-btn" data-route="profile"><i class="fa-solid fa-paw"></i></a>
+                    <button class="icon-btn signout-btn" id="signOutBtn" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notif-header">Notifications</div>
+                        <div class="notif-item">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div>
+                                <strong>Login Activity Alert</strong>
+                                <p>New sign-in detected on a Windows device.</p>
+                                <small>Just now</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+
+            <!-- ----- HOME VIEW ----- -->
+            <div id="home-view" class="view-section active">
+                <div class="home-grid">
+                    <div class="card" style="position: relative;">
+                        <div id="homePrevPetBtn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; cursor: pointer; display: none; z-index: 10; padding: 10px;"><i class="fa-solid fa-angle-left"></i></div>
+                        <div id="homeNextPetBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; cursor: pointer; display: none; z-index: 10; padding: 10px;"><i class="fa-solid fa-angle-right"></i></div>
+                        <div id="homeNoPets" style="display: none; text-align: center; padding: 40px; margin: 0 20px; background: var(--white); border-radius: var(--border-radius-lg); color: var(--text-light);">
+                            <i class="fa-solid fa-paw" style="font-size: 3rem; color: #ddd; margin-bottom: 15px;"></i>
+                            <h3 style="color: var(--primary);">No Pets Registered Yet</h3>
+                            <p>Go to the Register tab to add your first pet!</p>
+                        </div>
+                        <div class="pet-card" id="homePetCard" style="margin: 0 20px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="pet-image-container" id="homePetImageContainer"><span>[Pet Photo]</span></div>
+                            </div>
+                            <div class="pet-details">
+                                <h2 id="homePetName">Cooper</h2>
+                                <div class="pet-info-grid">
+                                    <span class="pet-info-label">PET ID NUMBER:</span><span class="pet-info-value" id="homePetId">0000000001</span>
+                                    <span class="pet-info-label">BREED:</span><span class="pet-info-value" id="homePetBreed">SHIH TZU</span>
+                                    <span class="pet-info-label">BIRTHDAY:</span><span class="pet-info-value" id="homePetBirthday">MAY 22, 2022</span>
+                                </div>
+                                <div class="pet-info-grid" style="margin-top: 15px;">
+                                    <span class="pet-info-label">OWNER NAME:</span><span class="pet-info-value" id="homeOwnerName">Marc Adrian Toleros</span>
+                                    <span class="pet-info-label">PHONE:</span><span class="pet-info-value" id="homeOwnerPhone">0999-222-3333</span>
+                                    <span class="pet-info-label">EMAIL:</span><span class="pet-info-value" id="homeOwnerEmail">petlover67@gmail.com</span>
+                                </div>
+                                <div class="pet-stats">
+                                    <div>
+                                        <span class="pet-info-label text-sm">KG:</span> <span class="stat-value" id="homePetKg">67 kg</span><br>
+                                        <span class="pet-info-label text-sm">GENDER:</span> <span class="stat-value" id="homePetGender">FEMALE</span>
+                                    </div>
+                                    <div>
+                                        <span class="pet-info-label text-sm">NEUTERED:</span> <span class="stat-value active" id="homeNeuteredYes">YES</span> / <span class="stat-value" id="homeNeuteredNo">NO</span><br>
+                                        <span class="pet-info-label text-sm">VACCINATED:</span> <span class="stat-value active" id="homeVacYes">YES</span> / <span class="stat-value" id="homeVacNo">NO</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card happening-meow" id="homeAnnouncementsContainer" style="margin-bottom: 20px; border-left: 4px solid var(--primary); padding: 15px;">
+                        <h2 style="display:flex; align-items:center; gap:8px; font-size: 1.2rem;"><i class="fa-solid fa-bullhorn" style="color:var(--primary);"></i> ANNOUNCEMENTS</h2>
+                        <div id="homeAnnouncementsFeed" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                            <p style="font-size: 0.9rem; color: var(--text-light);">Loading announcements...</p>
+                        </div>
+                    </div>
+
+                    <div class="card happening-meow" style="background: linear-gradient(135deg, #FFF8ED 0%, #FFE8C8 50%, #FFDAA0 100%); overflow: hidden; position: relative;">
+                        <h2 style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-fire" style="color:#FF6B35;"></i> HAPPENING MEOW <i class="fa-solid fa-paw" style="color: var(--primary); animation: bounce 1s infinite;"></i></h2>
+                        <div class="happening-content" style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+                            <div class="happening-item" style="background: linear-gradient(135deg, #ffffff 0%, #FFF3E0 100%); padding: 15px; border-radius: 12px; border-left: 4px solid #FF6B35; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s;">
+                                <h3 style="font-size: 1rem; color: #FF6B35; margin-bottom: 5px;"><i class="fa-solid fa-trophy"></i> Pet of the Week</h3>
+                                <p style="font-size: 0.9rem;"><i class="fa-solid fa-dog"></i> <strong>Buddy</strong> from Brgy. 21 won the cutest pet award at the FurSafe community meetup last Saturday! Congrats! <i class="fa-solid fa-award"></i></p>
+                            </div>
+                            <div class="happening-item" style="background: linear-gradient(135deg, #ffffff 0%, #E8F5E9 100%); padding: 15px; border-radius: 12px; border-left: 4px solid #4CAF50; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s;">
+                                <h3 style="font-size: 1rem; color: #4CAF50; margin-bottom: 5px;"><i class="fa-solid fa-calendar-star"></i> Upcoming Event</h3>
+                                <p style="font-size: 0.9rem;"><i class="fa-solid fa-tent"></i> <strong>Pet Parade 2026</strong> is happening on July 5th at Caloocan City Plaza! Register your fur babies now and join the fun walk. <i class="fa-solid fa-paw"></i></p>
+                            </div>
+                            <div class="happening-item" style="background: linear-gradient(135deg, #ffffff 0%, #E3F2FD 100%); padding: 15px; border-radius: 12px; border-left: 4px solid #2196F3; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s;">
+                                <h3 style="font-size: 1rem; color: #2196F3; margin-bottom: 5px;"><i class="fa-solid fa-lightbulb"></i> Did You Know?</h3>
+                                <p style="font-size: 0.9rem;"><i class="fa-solid fa-cat"></i> Cats spend 70% of their lives sleeping! And a group of cats is called a "clowder." Meanwhile, dogs can learn up to 250 words! <i class="fa-solid fa-brain"></i></p>
+                            </div>
+                            <div class="happening-item" style="background: linear-gradient(135deg, #ffffff 0%, #FCE4EC 100%); padding: 15px; border-radius: 12px; border-left: 4px solid #E91E63; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s;">
+                                <h3 style="font-size: 1rem; color: #E91E63; margin-bottom: 5px;"><i class="fa-solid fa-heart-pulse"></i> Health Tip</h3>
+                                <p style="font-size: 0.9rem;"><i class="fa-solid fa-syringe"></i> Reminder: Make sure your fur babies are updated with their anti-rabies vaccines! Free vaccination at Brgy. 21 Hall every last Friday of the month. <i class="fa-solid fa-hospital"></i></p>
+                            </div>
+                            <div class="happening-item" style="background: linear-gradient(135deg, #ffffff 0%, #F3E5F5 100%); padding: 15px; border-radius: 12px; border-left: 4px solid #9C27B0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s;">
+                                <h3 style="font-size: 1rem; color: #9C27B0; margin-bottom: 5px;"><i class="fa-solid fa-ranking-star"></i> Community Spotlight</h3>
+                                <p style="font-size: 0.9rem;"><i class="fa-solid fa-star"></i> Shoutout to <strong>Ate Maria</strong> for rescuing and rehoming 5 stray kittens this month! You're a real-life superhero! <i class="fa-solid fa-heart"></i></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>PET EVENTS</h2>
+                        <div class="events-list">
+                            <div class="event-item">
+                                <div class="event-title">Free anti-rabies vaccine drive</div>
+                                <div class="event-desc">June 28, 2026, 8 AM, at the Barangay 21 hall.</div>
+                                <a href="#" class="event-link" data-route="services">Learn more.</a>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-title">Free check up for Cats and Dogs</div>
+                                <div class="event-desc">June 29, 2026, 8 AM, at the Barangay 21 hall.</div>
+                                <a href="#" class="event-link" data-route="services">Learn more.</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ----- REGISTER VIEW ----- -->
+            <div id="register-view" class="view-section">
+                <form id="registrationForm">
+                    <div class="register-container">
+                        <div class="card form-card">
+                            <div class="form-header">
+                                <div class="form-header-icon"><i class="fa-regular fa-pen-to-square"></i></div>
+                                <div><h2>REGISTRATION PAGE</h2><p>OWNER REGISTRATION FORM</p></div>
+                            </div>
+                            <div class="section-title">OWNER INFORMATION</div>
+                            <div class="form-grid">
+                                <div class="form-group"><label>FIRST NAME <span>*</span></label><input type="text" id="ownerFirstName" class="no-digits" maxlength="20" required></div>
+                                <div class="form-group"><label>LAST NAME <span>*</span></label><input type="text" id="ownerLastName" class="no-digits" maxlength="20" required></div>
+                                <div class="form-group"><label>CONTACT NUMBER <span>*</span></label><input type="text" id="ownerContact" class="only-numbers" required></div>
+                                <div class="form-group">
+                                    <label>SEX <span>*</span></label>
+                                    <div class="checkbox-group-inline" style="flex-wrap: wrap; gap: 10px;">
+                                        <label class="checkbox-label"><input type="checkbox" name="ownerSex" value="Male" class="single-checkbox"> MALE</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="ownerSex" value="Female" class="single-checkbox"> FEMALE</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="ownerSex" value="Prefer not to say" class="single-checkbox"> PREFER NOT TO SAY</label>
+                                    </div>
+                                </div>
+                                <div class="form-group"><label>HOUSE/LOT NUMBER <span>*</span></label><input type="text" id="ownerHouse" class="only-numbers" pattern="[0-9]+" title="Numbers only" required></div>
+                                <div class="form-group"><label>STREET NAME <span>*</span></label><input type="text" id="ownerStreet" class="letters-only" required></div>
+                                <div class="form-group full-width"><label>PHASE/SUBDIVISION/PUROK <span>*</span></label><input type="text" id="ownerPhase" class="letters-only" maxlength="50" required></div>
+                                <div class="form-group full-width"><label>EMAIL ADDRESS <span>*</span></label><input type="email" id="ownerEmail" required></div>
+                            </div>
+                        </div>
+
+                        <div class="divider-vertical"></div>
+
+                        <div class="card form-card">
+                            <div class="form-header">
+                                <div class="form-header-icon"><i class="fa-solid fa-paw"></i></div>
+                                <div><h2>REGISTRATION PAGE</h2><p>PET REGISTRATION FORM</p></div>
+                            </div>
+                            <div class="form-grid">
+                                <div style="grid-column: 1; display: flex; flex-direction: column; gap: 15px;">
+                                    <div class="section-title" style="margin-bottom: 0;">PET INFORMATION</div>
+                                    <div class="form-group"><label>PET NAME</label><input type="text" id="petName" class="no-digits" maxlength="15"></div>
+                                    <div class="form-group">
+                                        <label>DATE OF BIRTH</label>
+                                        <input type="date" id="petDOB">
+                                    </div>
+                                </div>
+                                <div style="grid-column: 2;">
+                                    <label style="font-size: 0.8rem; color: var(--text-light); text-transform: uppercase;">PET PHOTO</label>
+                                    <div class="photo-upload" id="petPhotoUploadBox" style="cursor:pointer;" onclick="document.getElementById('petPhotoInput').click()">
+                                        <img id="petPhotoPreview" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius: var(--border-radius-md); position:absolute; top:0; left:0;">
+                                        <i class="fa-solid fa-image" id="petPhotoIcon"></i>
+                                        <div style="font-size: 0.7rem;" id="petPhotoLabel">UPLOAD PHOTO</div>
+                                        <div style="font-size: 0.6rem; color: #999;" id="petPhotoHint">PNG, JPG UP TO 5MB</div>
+                                        <input type="file" style="display:none;" id="petPhotoInput" accept="image/png, image/jpeg">
+                                    </div>
+                                    <button type="button" id="removePetPhotoBtn" class="btn btn-cancel" style="display:none; margin-top:10px; width:100%; padding: 5px;">Remove Photo</button>
+                                </div>
+                                <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                    <div class="form-group"><label>AGE (Human Years)</label><input type="text" id="petAge" class="only-numbers" readonly></div>
+                                    <div class="form-group"><label>WEIGHT (kg)</label><input type="text" id="petWeight" class="only-numbers" maxlength="3" pattern="[0-9]{1,3}" title="Up to 3 digits only"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>SEX</label>
+                                    <div class="checkbox-group-inline">
+                                        <label class="checkbox-label"><input type="checkbox" name="petSex" value="Male" class="single-checkbox"> MALE</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSex" value="Female" class="single-checkbox"> FEMALE</label>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="grid-column: 2;">
+                                    <label>NEUTERED / SPAYED</label>
+                                    <div class="checkbox-group-inline">
+                                        <label class="checkbox-label"><input type="checkbox" name="petNeutered" value="Yes" class="single-checkbox"> YES</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petNeutered" value="No" class="single-checkbox"> NO</label>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label>SPECIE</label>
+                                    <div class="checkbox-group-inline" style="flex-wrap: wrap; gap: 10px;" id="speciesCheckboxGroup">
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Dog" class="single-checkbox-species"> Dog</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Cat" class="single-checkbox-species"> Cat</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Rabbit" class="single-checkbox-species"> Rabbit</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Hamster" class="single-checkbox-species"> Hamster</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Guinea Pig" class="single-checkbox-species"> Guinea Pig</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Chicken" class="single-checkbox-species"> Chicken</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Birds" class="single-checkbox-species"> Birds</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Others" class="single-checkbox-species"> Others</label>
+                                    </div>
+                                    <input type="text" id="petSpeciesOther" class="no-digits" placeholder="Specify other species" style="display:none; margin-top:10px; width:100%;" maxlength="25">
+                                    <input type="hidden" id="petSpecies">
+                                </div>
+                                <div class="form-group"><label>BREED</label><input type="text" id="petBreed" class="no-digits"></div>
+                                <div class="form-group full-width"><label>COLOR OR MARKINGS</label><input type="text" id="petColor" class="no-digits"></div>
+                                <div class="form-group full-width">
+                                    <label>VACCINATION STATUS</label>
+                                    <div class="vaccination-group">
+                                        <button type="button" class="vac-btn active-vac" id="btnVac">VACCINATED</button>
+                                        <button type="button" class="vac-btn" id="btnNotVac">NOT VACCINATED</button>
+                                    </div>
+                                    <input type="hidden" id="vaccinationStatus" value="Vaccinated">
+                                    
+                                    <div id="vaccineCheckboxes" style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="Rabies"> Rabies</label>
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="Distemper"> Distemper</label>
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="ParvoVirus"> ParvoVirus</label>
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="Bordetella"> Bordetella</label>
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="Leptospira"> Leptospira</label>
+                                        <label class="checkbox-label" style="font-weight: normal;"><input type="checkbox" name="vaccines" value="Hepatitis"> Hepatitis</label>
+                                        <label class="checkbox-label" style="font-weight: normal; grid-column: span 2;"><input type="checkbox" id="vaccineOtherCb"> Other</label>
+                                    </div>
+                                    <input type="text" id="vaccineOtherInput" class="no-digits" placeholder="Specify other vaccine" style="display:none; margin-top:10px; width:100%;" maxlength="25">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="button" class="btn-print" id="printPdfBtn"><i class="fa-solid fa-print"></i> Print/Save PDF</button>
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-play"></i> Submit Registration</button>
+                    </div>
+                </form>
+            </div>
+
+
+            <!-- ----- SERVICES VIEW ----- -->
+            <div id="services-view" class="view-section">
+                <div class="card" style="padding: 30px;">
+                    <div class="services-layout">
+                        <div>
+                            <div class="page-header">
+                                <i class="fa-solid fa-user-doctor"></i>
+                                <div><h2>CONSULT A VET</h2><p>VISIT NEARBY CLINICS</p></div>
+                            </div>
+                            <div class="section-subtitle" id="toggleNearbyClinics" style="cursor: pointer;"><i class="fa-solid fa-bars"></i> NEARBY CLINICS</div>
+                            <div class="clinic-list" id="clinicListContainer">
+                                <!-- First 3 clinics -->
+                                <div class="clinic-card" onclick="focusClinic(14.6507, 120.9885, 'Caloocan Veterinary Center', '1061 Gen. San Miguel St.', '9AM - 7PM', '09664158646', 'caloocanvetcenter@gmail.com')">
+                                    <div class="clinic-info">
+                                        <div class="clinic-icon"><i class="fa-solid fa-plus"></i></div>
+                                        <div><div class="clinic-name">Caloocan Veterinary Center</div><div class="clinic-distance">0.0 KM AWAY</div>
+                                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:3px;">
+                                                <i class="fa-solid fa-phone" style="color:var(--primary); margin-right:4px;"></i>09664158646
+                                                &nbsp;|&nbsp;
+                                                <i class="fa-solid fa-envelope" style="color:var(--primary); margin-right:4px;"></i>caloocanvetcenter@gmail.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="status-badge open">OPEN</div>
+                                </div>
+                                <div class="clinic-card" onclick="focusClinic(14.6465, 120.9850, 'Vet Street Animal Medical Center', 'A. Mabini St, Caloocan', '8AM - 6PM', '09123456789', 'vetstreet.amc@gmail.com')">
+                                    <div class="clinic-info">
+                                        <div class="clinic-icon"><i class="fa-solid fa-house-medical"></i></div>
+                                        <div><div class="clinic-name">Vet Street Animal Medical Center</div><div class="clinic-distance">0.5 KM AWAY</div>
+                                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:3px;">
+                                                <i class="fa-solid fa-phone" style="color:var(--primary); margin-right:4px;"></i>09123456789
+                                                &nbsp;|&nbsp;
+                                                <i class="fa-solid fa-envelope" style="color:var(--primary); margin-right:4px;"></i>vetstreet.amc@gmail.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="status-badge open">OPEN</div>
+                                </div>
+                                <div class="clinic-card" onclick="focusClinic(14.6550, 120.9810, 'VETCROSS Center', 'Samson Road, Caloocan', '10AM - 5PM', '09198765432', 'vetcrosscenter@yahoo.com')">
+                                    <div class="clinic-info">
+                                        <div class="clinic-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                                        <div><div class="clinic-name">VETCROSS Center</div><div class="clinic-distance">1.2 KM AWAY</div>
+                                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:3px;">
+                                                <i class="fa-solid fa-phone" style="color:var(--primary); margin-right:4px;"></i>09198765432
+                                                &nbsp;|&nbsp;
+                                                <i class="fa-solid fa-envelope" style="color:var(--primary); margin-right:4px;"></i>vetcrosscenter@yahoo.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="status-badge closed">CLOSED</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Search Bar for other clinics -->
+                            <div id="clinicSearchBar" style="margin-top: 20px; position: relative;">
+                                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 12px; color: #ccc;"></i>
+                                <input type="text" id="clinicSearch" placeholder="Search clinics..." style="width: 100%; padding: 10px 10px 10px 40px; border: 2px solid var(--primary); border-radius: 20px; outline: none; font-family: var(--font-body);">
+                            </div>
+
+                            <!-- Hidden Clinics for search -->
+                            <div id="hiddenClinics" style="display: none;">
+                                <div class="clinic-card search-item" data-name="pawcare veterinary clinic" onclick="focusClinic(14.6600, 120.9900, 'PawCare Veterinary Clinic', 'Monumento Circle', '24 Hours', '09221113333', 'pawcarevet.caloocan@gmail.com')">
+                                    <div class="clinic-info">
+                                        <div class="clinic-icon"><i class="fa-solid fa-plus"></i></div>
+                                        <div><div class="clinic-name">PawCare Veterinary Clinic</div><div class="clinic-distance">2.0 KM AWAY</div>
+                                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:3px;">
+                                                <i class="fa-solid fa-phone" style="color:var(--primary); margin-right:4px;"></i>09221113333
+                                                &nbsp;|&nbsp;
+                                                <i class="fa-solid fa-envelope" style="color:var(--primary); margin-right:4px;"></i>pawcarevet.caloocan@gmail.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="status-badge open">OPEN</div>
+                                </div>
+                                <div class="clinic-card search-item" data-name="happy tails animal hospital" onclick="focusClinic(14.6400, 120.9700, 'Happy Tails Animal Hospital', '5th Avenue', '9AM - 8PM', '09445556666', 'happytailsvet@outlook.com')">
+                                    <div class="clinic-info">
+                                        <div class="clinic-icon"><i class="fa-solid fa-plus"></i></div>
+                                        <div><div class="clinic-name">Happy Tails Animal Hospital</div><div class="clinic-distance">2.5 KM AWAY</div>
+                                            <div style="font-size:0.75rem; color:var(--text-light); margin-top:3px;">
+                                                <i class="fa-solid fa-phone" style="color:var(--primary); margin-right:4px;"></i>09445556666
+                                                &nbsp;|&nbsp;
+                                                <i class="fa-solid fa-envelope" style="color:var(--primary); margin-right:4px;"></i>happytailsvet@outlook.com
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="status-badge open">OPEN</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="map-header"><i class="fa-solid fa-map"></i><h2>MAP VIEW</h2></div>
+                            <div id="map" class="map-container"></div>
+                            <div class="clinic-details-card">
+                                <h3 id="detailClinicName">Caloocan Veterinary Center</h3>
+                                <div class="details-grid">
+                                    <div class="detail-item"><label>ADDRESS</label><p id="detailClinicAddress">1061 General San Miguel St, Sangandaan, Caloocan, Metro Manila</p></div>
+                                    <div class="detail-item"><label>HOURS</label><p id="detailClinicHours">9AM - 7PM</p></div>
+                                    <div class="detail-item"><label>CONTACT</label><p id="detailClinicContact">09664158646</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ----- COMMUNITY VIEW ----- -->
+            <div id="community-view" class="view-section">
+                <div class="community-layout">
+                    <div class="left-sidebar">
+                        <div class="card stats-card" style="padding: 20px 15px;">
+                            <div class="stats-title">Community Stats</div>
+                            <div class="stat-row" style="background-color: #FDE8C4;"><div class="stat-label">REGISTERED PETS</div><div class="stat-number" id="statRegisteredPets">0</div></div>
+                            <div class="stat-row" style="background-color: #FDE8C4; opacity: 0.8;"><div class="stat-label">POSTS THIS WEEK</div><div class="stat-number" id="statPostsThisWeek">0</div></div>
+                        </div>
+                        <div class="announcements">
+                            <h3><i class="fa-solid fa-bell"></i> Announcement</h3>
+                            <div id="communityAnnouncementsFeed">
+                                <p style="font-size: 0.9rem; color: var(--text-light);">Loading announcements...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card main-feed">
+                        <div class="post-input-container" style="display: flex; flex-direction: column;">
+                            <div style="display: flex; align-items: center; width: 100%; gap: 12px;">
+                                <div class="post-avatar" id="communityUserAvatar" style="flex-shrink:0;">
+                                    <img id="communityAvatarImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                    <i class="fa-solid fa-user" id="communityAvatarIcon" style="color:#aaa; font-size:1.4rem;"></i>
+                                </div>
+                                <input type="text" id="postContentInput" placeholder="What's on meow mind?" style="flex: 1; border: none; background: transparent; outline: none; font-size: 1rem;">
+                                <input type="file" id="postImageFile" accept="image/*" style="display:none;">
+                                <i class="fa-solid fa-image" id="postImageBtn" style="color: var(--primary); font-size: 1.5rem; cursor: pointer; margin-left: 10px;" title="Attach image"></i>
+                            </div>
+                            <!-- Post image preview -->
+                            <div id="postImagePreviewContainer" style="display:none; margin-top:10px; position:relative;">
+                                <img id="postImagePreview" src="" alt="Preview" style="max-height:150px; border-radius:8px; object-fit:cover;">
+                                <button id="postImageRemoveBtn" style="position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px; line-height:24px; text-align:center;">&times;</button>
+                            </div>
+                            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                                <span style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 5px; display: block;">Select up to 2 categories:</span>
+                                <div class="checkbox-group-inline" style="flex-wrap: wrap; gap: 10px;">
+                                    <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="postCat" value="Pet Moment" class="multi-cat"> Pet Moment</label>
+                                    <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="postCat" value="Medical Attention" class="multi-cat"> Medical Attention</label>
+                                    <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="postCat" value="Q&A" class="multi-cat"> Q&A</label>
+                                    <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="postCat" value="Event" class="multi-cat"> Event</label>
+                                </div>
+                                <button class="btn btn-primary" id="postSubmitBtn" style="margin-top: 10px; align-self: flex-end;">Post</button>
+                            </div>
+                        </div>
+                        <!-- Dynamic posts container - populated from Supabase -->
+                        <div id="communityPostsFeed"></div>
+                    </div>
+                    <div class="card right-sidebar">
+                        <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search forum"></div>
+                        
+                        <div class="hashtags-title" style="margin-top: 20px;">Filter by Category</div>
+                        <div class="filter-group" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                            <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="filterCat" value="Pet Moment"> Pet Moment</label>
+                            <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="filterCat" value="Medical Attention"> Medical Attention</label>
+                            <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="filterCat" value="Q&A"> Q&A</label>
+                            <label class="checkbox-label" style="font-size: 0.85rem;"><input type="checkbox" name="filterCat" value="Event"> Event</label>
+                        </div>
+
+                        <div class="hashtags-title">Today's top hashtags</div>
+                        <div class="hashtag-item">
+                            <div class="hashtag-name">1 #ilovedogs</div>
+                            <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">Fur parents have been having a friendly war between dogs and cats.</p>
+                        </div>
+                        <div class="hashtag-item">
+                            <div class="hashtag-name">2 #ilovecats</div>
+                            <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">Fur parents have been having a friendly war between dogs and cats.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ----- ABOUT VIEW ----- -->
+            <div id="about-view" class="view-section">
+                <div class="about-banner">
+                    <div class="dog-left"><img src="bgimages/Dog2.png" alt="Dog Left"></div>
+                    <div class="dog-right"><img src="bgimages/Dog1.png" alt="Dog Right"></div>
+                    <div style="position: relative; z-index: 10;">
+                        <h1>About Us</h1>
+                        <p>Placeholder text!!!!</p>
+                    </div>
+                </div>
+                <h2 class="meet-team-title">Meet the Team</h2>
+                <div class="team-grid">
+                    <div class="team-card"><div class="team-avatar"><i class="fa-solid fa-paw"></i></div><div class="team-info"><div class="team-name">Abigail Mapue</div><div class="team-role">UI/UX Designer</div></div></div>
+                    <div class="team-card"><div class="team-avatar"><i class="fa-solid fa-paw"></i></div><div class="team-info"><div class="team-name">Christilyn Dela Cruz</div><div class="team-role">UI/UX Designer</div></div></div>
+                    <div class="team-card"><div class="team-avatar"><i class="fa-solid fa-paw"></i></div><div class="team-info"><div class="team-name">Marc Toleros</div><div class="team-role">Developer</div></div></div>
+                    <div class="team-card"><div class="team-avatar"><i class="fa-solid fa-paw"></i></div><div class="team-info"><div class="team-name">Amver Togonon</div><div class="team-role">Developer</div></div></div>
+                    <div class="team-card"><div class="team-avatar"><i class="fa-solid fa-paw"></i></div><div class="team-info"><div class="team-name">Vince Divinagracia</div><div class="team-role">UI/UX Designer</div></div></div>
+                </div>
+                
+                <h2 class="meet-team-title" style="margin-top: 50px;">Vision & Mission</h2>
+                <div class="team-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 50px;">
+                    <div class="card" style="padding: 30px; text-align: center;">
+                        <i class="fa-solid fa-eye" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--primary); margin-bottom: 15px; font-family: var(--font-heading);">Our Vision</h3>
+                        <p style="color: var(--text-light); line-height: 1.6;">To create a safer, more connected community where every pet is protected, valued, and easily reunited with their loving families through innovative technology and barangay cooperation.</p>
+                    </div>
+                    <div class="card" style="padding: 30px; text-align: center;">
+                        <i class="fa-solid fa-bullseye" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--primary); margin-bottom: 15px; font-family: var(--font-heading);">Our Mission</h3>
+                        <p style="color: var(--text-light); line-height: 1.6;">To provide a seamless, accessible platform for pet registration and community engagement, empowering pet owners and local officials to ensure the health, safety, and well-being of all animals in Caloocan.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ----- SETTINGS VIEW ----- -->
+            <div id="settings-view" class="view-section">
+                <div class="settings-layout">
+                    <div>
+                        <div class="settings-card" style="border-top: none;">
+                            <div style="padding: 20px;">
+                                <div class="setting-toggle-row"><div class="toggle-info"><strong id="lblLoginActivity">Login Activity Alerts</strong></div><label class="custom-toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <div class="settings-header">Language and Region</div>
+                            <div class="settings-body">
+                                <div class="form-row">
+                                    <div class="settings-input-group"><label>LANGUAGE</label><select id="languageSelect"><option value="en">English</option><option value="tl">Filipino</option></select></div>
+                                </div>
+                                <!-- Dark Mode moved here -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding:12px 0; border-top:1px solid #f0f0f0;">
+                                    <div>
+                                        <div style="font-weight:700; color:var(--text-dark);" id="darkModeLabel">Dark Mode</div>
+                                        <div style="font-size:0.8rem; color:var(--text-light);">Switch between light and dark themes</div>
+                                    </div>
+                                    <label class="custom-toggle"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
+                                </div>
+                                <!-- Font Size Slider -->
+                                <div style="margin-top:18px; padding-top:12px; border-top:1px solid #f0f0f0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                        <div>
+                                            <div style="font-weight:700; color:var(--text-dark);">Website Text Size</div>
+                                            <div style="font-size:0.8rem; color:var(--text-light);">Drag to adjust how big or small text appears</div>
+                                        </div>
+                                        <span id="fontSizeLabel" style="font-weight:700; color:var(--primary); min-width:40px; text-align:right;">100%</span>
+                                    </div>
+                                    <input type="range" id="fontSizeSlider" min="80" max="130" value="100" step="5"
+                                        style="width:100%; accent-color:var(--primary); cursor:pointer; height:6px;">
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-light); margin-top:4px;">
+                                        <span>Smaller</span><span>Default</span><span>Larger</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-footer"><button class="btn btn-cancel" id="cancelLangBtn">Cancel</button><button class="btn btn-save" id="saveLangBtn">Save Changes</button></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="settings-card">
+                            <div class="settings-body" style="overflow: hidden;">
+                                <div class="profile-photo-section">
+                                    <div class="photo-upload-dashed" id="avatarUploadBox" style="cursor:pointer; position:relative; overflow:hidden;" onclick="document.getElementById('avatarFileInput').click()">
+                                        <img id="avatarPreview" src="" alt="Avatar" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; border-radius: var(--border-radius-md);">
+                                        <i class="fa-solid fa-camera" id="avatarCameraIcon"></i>
+                                        <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+                                    </div>
+                                    <button class="btn btn-save" id="btnChangePhotoLabel" style="border-radius: 50px; margin-top: 10px;" onclick="document.getElementById('avatarFileInput').click()">Change Photo</button>
+                                    <button class="btn btn-cancel" id="btnRemoveAvatarPhoto" style="border-radius: 50px; margin-top: 5px;">Remove Photo</button>
+                                </div>
+                                <div style="overflow: hidden;">
+                                    <div class="form-row">
+                                        <div class="settings-input-group"><label id="lblFirstName">FIRST NAME</label><input type="text" id="userFirstName" class="no-digits"></div>
+                                        <div class="settings-input-group"><label id="lblLastName">LAST NAME</label><input type="text" id="userLastName" class="no-digits"></div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="settings-input-group"><label id="lblEmail">EMAIL ADDRESS</label><input type="email" id="userEmail" disabled></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-footer"><button class="btn btn-cancel" id="btnCancelProfile">Cancel</button><button class="btn btn-save" id="saveUserInfoBtn">Save Changes</button></div>
+                        </div>
+                        <div class="settings-card">
+                            <div class="settings-body">
+                                <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+                                    <div class="settings-input-group">
+                                        <label id="lblCurPwd">CURRENT PASSWORD</label>
+                                        <div style="position:relative;">
+                                            <input type="password" id="currentPasswordInput" placeholder="Enter current password">
+                                            <i class="fa-solid fa-eye-slash" id="toggleCurPwd" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;cursor:pointer;z-index:2;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="settings-input-group">
+                                        <label id="lblNewPwd">NEW PASSWORD</label>
+                                        <div style="position:relative;">
+                                            <input type="password" id="newPasswordInput" placeholder="Enter new password">
+                                            <i class="fa-solid fa-eye-slash" id="toggleNewPwd" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;cursor:pointer;z-index:2;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="settings-input-group">
+                                        <label id="lblConfPwd">CONFIRM NEW PASSWORD</label>
+                                        <div style="position:relative;">
+                                            <input type="password" id="confirmPasswordInput" placeholder="Re-enter new password">
+                                            <i class="fa-solid fa-eye-slash" id="toggleConfPwd" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#aaa;cursor:pointer;z-index:2;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-footer"><button class="btn btn-cancel" id="btnCancelPwd">Cancel</button><button class="btn btn-save" id="savePwdBtn">Save Changes</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ----- PROFILE VIEW ----- -->
+            <div id="profile-view" class="view-section">
+                <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+                    <select id="petProfileSelector" style="padding: 10px; border-radius: 8px; border: 2px solid var(--primary); outline: none; font-family: var(--font-body); font-weight: bold; color: var(--primary); background-color: var(--white); cursor: pointer;">
+                        <option value="1">Pet 1: Cooper</option>
+                        <option value="2" style="display:none;" id="pet2Option">Pet 2: Bella</option>
+                    </select>
+                </div>
+                <div class="card profile-container">
+                    <div class="profile-top">
+                        <div class="profile-left">
+                            <div class="pet-photo-display" id="profilePetPhotoBox">
+                                <img id="profilePetPhotoImg" src="" alt="Pet Photo" style="display:none; width:100%; height:100%; object-fit:cover; border-radius: var(--border-radius-lg);">
+                                <div id="profilePetPhotoPlaceholder" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color: var(--text-light);">
+                                    <i class="fa-solid fa-paw" style="font-size:3rem; color:var(--primary); margin-bottom:10px;"></i>
+                                    <span style="font-size:0.8rem; font-weight:700;">No Photo Yet</span>
+                                </div>
+                            </div>
+                            <h2 class="pet-summary-name" id="displayPetName">Pet Name</h2>
+                            <div class="pet-summary-breed" id="profilePetBreedLabel">Pet Breed</div>
+                            <div class="badge-vaccinated" id="profileVacBadge">Vaccinated</div>
+                        </div>
+                        <div class="profile-right">
+                            <div class="form-row-3">
+                                <div class="profile-input-group"><label>PET NAME</label><input type="text" id="profilePetName" class="no-digits" value=""></div>
+                                <div class="profile-input-group"><label>BREED</label><input type="text" id="profilePetBreed" class="no-digits" value=""></div>
+                                <div class="profile-input-group"><label>AGE</label><input type="text" id="profilePetAge" class="only-numbers" value=""></div>
+                            </div>
+                            <div class="form-row-3">
+                                <div class="profile-input-group"><label>SEX</label><input type="text" id="profilePetSex" class="no-digits" value=""></div>
+                                <div class="profile-input-group"><label>COLOR / MARKINGS</label><input type="text" id="profilePetColor" class="no-digits" value=""></div>
+                                <div class="profile-input-group"><label>SPECIES</label><input type="text" id="profilePetSpecies" class="no-digits" value=""></div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="profile-input-group"><label>OWNER'S NAME</label><input type="text" id="profileOwnerName" class="no-digits" value="" readonly></div>
+                                <div class="profile-input-group"><label>CONTACT NUMBER</label><input type="text" id="profileOwnerContact" class="only-numbers" value="" readonly></div>
+                            </div>
+                            <div class="profile-input-group"><label>HOME ADDRESS</label><input type="text" id="profileOwnerAddress" value="" readonly></div>
+                        </div>
+                    </div>
+                    <div class="divider-horizontal"></div>
+                    <div class="pawsport-header"><i class="fa-solid fa-paw"></i><h2>PAWSPORT <span>FurSafe Vaccination Record</span></h2></div>
+                    <div class="pawsport-card">
+                        <div class="pawsport-card-header" id="profilePawsportHeader">Pet's Name &bull; ID: 2024 - 12345</div>
+                        <div class="vaccine-grid">
+                            <div class="vaccine-item"><div class="vaccine-name">Rabies</div><div class="vac-badge vac-not-yet" id="vacBadgeRabies">Not yet</div></div>
+                            <div class="vaccine-item"><div class="vaccine-name">Distemper</div><div class="vac-badge vac-not-yet" id="vacBadgeDistemper">Not yet</div></div>
+                            <div class="vaccine-item"><div class="vaccine-name">Parvovirus</div><div class="vac-badge vac-not-yet" id="vacBadgeParvovirus">Not yet</div></div>
+                            <div class="vaccine-item"><div class="vaccine-name">Bordetella</div><div class="vac-badge vac-not-yet" id="vacBadgeBordetella">Not yet</div></div>
+                            <div class="vaccine-item"><div class="vaccine-name">Leptospira</div><div class="vac-badge vac-not-yet" id="vacBadgeLeptospira">Not yet</div></div>
+                            <div class="vaccine-item"><div class="vaccine-name" id="vacNameOther">Hepatitis</div><div class="vac-badge vac-not-yet" id="vacBadgeHepatitis">Not yet</div></div>
+                            <div class="vaccine-item" id="vacOtherRow" style="display:none;"><div class="vaccine-name" id="vacOtherName">Other</div><div class="vac-badge vac-not-yet" id="vacBadgeOther">Not yet</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Modal for Terms and Privacy -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Terms of Service</h2>
+            <div id="modalBody" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-light);">
+                <p>Welcome to FurSafe. By using our services, you agree to the following terms and conditions...</p>
+                <p>Please replace this exact line with your own legal documents.</p>
+            </div>
+            <button class="btn btn-primary btn-block" id="closeModalBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2>Forgot your Password?</h2>
+            <p style="color: var(--text-light); margin-bottom: 20px; font-size: 0.9rem;">
+                Please contact the barangay officials and admins for verification and assistance. This is to ensure secure access to your account so we can give you a chance to change your password.
+            </p>
+            <div style="background-color: var(--bg-color); padding: 15px; border-radius: var(--border-radius-md); margin-bottom: 20px; text-align: left;">
+                <h4 style="margin-bottom: 10px;">Contact Us:</h4>
+                <div style="margin-bottom: 5px;"><i class="fa-brands fa-facebook" style="color: #1877F2; margin-right: 10px;"></i> /Brgy21Caloocan</div>
+                <div style="margin-bottom: 5px;"><i class="fa-brands fa-instagram" style="color: #E4405F; margin-right: 10px;"></i> @Brgy21Caloocan</div>
+                <div><i class="fa-solid fa-envelope" style="color: #EA4335; margin-right: 10px;"></i> admin@brgy21.com</div>
+            </div>
+            <button class="btn btn-primary btn-block" id="closeForgotModalBtn">Understood</button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fa-solid fa-circle-check" style="font-size: 4rem; color: var(--success); margin-bottom: 15px;"></i>
+            <h2>Success!</h2>
+            <p id="successModalMessage" style="color: var(--text-light); margin-bottom: 20px; font-size: 1rem;">
+                Action completed successfully.
+            </p>
+            <button class="btn btn-primary btn-block" id="closeSuccessModalBtn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Maintenance Overlay -->
+    <div id="maintenanceOverlay" style="display:none; position:fixed; inset:0; background:linear-gradient(135deg,#1a1a2e,#16213e); z-index:99999; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
+        <i class="fa-solid fa-screwdriver-wrench" style="font-size:5rem; color:#f39c12; margin-bottom:25px;"></i>
+        <h1 style="color:#fff; font-size:2.2rem; margin-bottom:10px;">We'll be back soon!</h1>
+        <p style="color:#aaa; font-size:1rem; max-width:400px;">FurSafe is currently under maintenance. Our team is working hard to improve your experience. Please check back later.</p>
+        <div style="margin-top:30px; padding:12px 25px; background:rgba(255,255,255,0.07); border-radius:12px; color:#f39c12; font-weight:700; letter-spacing:1px; font-size:0.85rem;">🛠 MAINTENANCE MODE</div>
+    </div>
+
+    <!-- Global Toast Notification -->
+    <div id="globalToast" style="display:none; position:fixed; bottom:30px; right:30px; z-index:9999; min-width:260px; max-width:380px; background:#2ecc71; color:#fff; padding:14px 20px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.2); display:flex; align-items:center; gap:12px; font-weight:600; font-size:0.95rem; transform:translateY(100px); opacity:0; transition:transform 0.35s ease, opacity 0.35s ease;">
+        <i class="fa-solid fa-circle-check" id="toastIcon" style="font-size:1.3rem;"></i>
+        <span id="toastMessage">Changes saved!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js?v=2.0.2"></script>
+</html>

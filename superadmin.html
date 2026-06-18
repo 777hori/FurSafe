@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FurSafe Super Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --purple: #c084fc;
+            --purple-light: #e9d5ff;
+            --purple-sidebar: #f3e8ff;
+            --purple-active: #ffffff;
+            --purple-dark: #9333ea;
+            --bg: #1e1e2e;
+            --bg-card: #2a2a3e;
+            --bg-card2: #252535;
+            --text: #f0f0f0;
+            --text-muted: #aaa;
+            --green: #4ade80;
+            --red: #f87171;
+            --yellow: #facc15;
+            --blue: #60a5fa;
+            --orange: #fb923c;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ===================== LOGIN PAGE ===================== */
+        #login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d1b4e 100%);
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 50px 45px;
+            width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            border: 1px solid rgba(192, 132, 252, 0.2);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-logo .paw-icon {
+            font-size: 2.5rem;
+            color: var(--purple);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .login-logo h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--purple);
+            letter-spacing: 1px;
+        }
+
+        .login-logo p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .login-field {
+            margin-bottom: 18px;
+        }
+
+        .login-field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .login-field input {
+            width: 100%;
+            padding: 13px 16px;
+            background: var(--bg);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .login-field input:focus {
+            border-color: var(--purple);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: inherit;
+            transition: background 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .login-btn:hover { background: var(--purple-dark); }
+
+        .login-error {
+            color: var(--red);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ===================== MAIN LAYOUT ===================== */
+        #admin-panel {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #admin-panel.active {
+            display: flex;
+        }
+
+        /* ===================== SIDEBAR ===================== */
+        .sidebar {
+            width: 220px;
+            background: var(--purple-sidebar);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .sidebar-logo {
+            padding: 22px 20px 16px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--purple-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo i { font-size: 1.4rem; }
+
+        .sidebar-profile {
+            padding: 14px 20px 18px;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+
+        .profile-initials {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--purple);
+            color: white;
+            font-weight: 800;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .profile-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #2d2d2d;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: var(--purple);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            padding: 13px 22px;
+            text-decoration: none;
+            color: #3d3d3d;
+            font-weight: 600;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.55); }
+
+        .nav-item.active {
+            background: white;
+            color: #1a1a1a;
+            border-right: 3px solid var(--purple);
+        }
+
+        .nav-item i {
+            color: var(--purple-dark);
+            width: 18px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-item.active i { color: var(--purple-dark); }
+
+        .sidebar-footer {
+            padding: 16px 0;
+            border-top: 1px solid rgba(0,0,0,0.07);
+        }
+
+        .nav-item.logout { color: #c0392b; }
+        .nav-item.logout i { color: #c0392b; }
+
+        /* ===================== MAIN CONTENT ===================== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .top-bar {
+            background: var(--bg-card);
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+
+        .top-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .top-bar-title i { color: var(--purple); font-size: 1.2rem; }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .top-bar-meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .icon-btn {
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .icon-btn:hover { color: var(--purple); }
+
+        .views-wrap {
+            flex: 1;
+            overflow-y: auto;
+            padding: 26px 28px;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ===================== STAT CARDS ===================== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-card.purple { border-left: 3px solid var(--purple); }
+        .stat-card.green { border-left: 3px solid var(--green); }
+        .stat-card.yellow { border-left: 3px solid var(--yellow); }
+        .stat-card.blue { border-left: 3px solid var(--blue); }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-card.purple .stat-value { color: var(--purple); }
+        .stat-card.green .stat-value { color: var(--green); }
+        .stat-card.yellow .stat-value { color: var(--yellow); }
+        .stat-card.blue .stat-value { color: var(--blue); }
+
+        .stat-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ===================== GRID CARDS ===================== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-link {
+            font-size: 0.8rem;
+            color: var(--purple);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .card-link:hover { text-decoration: underline; }
+
+        /* ===================== ADMIN LIST ITEMS ===================== */
+        .admin-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .admin-item:last-child { border-bottom: none; }
+
+        .avatar-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .av-purple { background: #9333ea; }
+        .av-pink { background: #ec4899; }
+        .av-blue { background: #3b82f6; }
+        .av-green { background: #10b981; }
+        .av-orange { background: #f97316; }
+        .av-teal { background: #14b8a6; }
+        .av-red { background: #ef4444; }
+
+        .admin-info { flex: 1; min-width: 0; }
+
+        .admin-info strong {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .admin-info span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .badges-row {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-admin { background: rgba(192,132,252,0.2); color: var(--purple); }
+        .badge-superadmin { background: rgba(250,204,21,0.2); color: var(--yellow); }
+        .badge-active { background: rgba(74,222,128,0.2); color: var(--green); }
+        .badge-inactive { background: rgba(248,113,113,0.2); color: var(--red); }
+        .badge-banned { background: rgba(248,113,113,0.3); color: var(--red); }
+        .badge-pending { background: rgba(251,146,60,0.2); color: var(--orange); }
+
+        /* ===================== AUDIT LOG ===================== */
+        .audit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.88rem;
+        }
+
+        .audit-item:last-child { border-bottom: none; }
+
+        .audit-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .dot-green { background: var(--green); }
+        .dot-yellow { background: var(--yellow); }
+        .dot-red { background: var(--red); }
+        .dot-purple { background: var(--purple); }
+        .dot-blue { background: var(--blue); }
+
+        .audit-text { flex: 1; line-height: 1.5; }
+        .audit-by { color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 2px; }
+        .audit-time { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+
+        /* ===================== ANNOUNCEMENTS ===================== */
+        .ann-card {
+            background: rgba(192,132,252,0.08);
+            border: 1px solid rgba(192,132,252,0.2);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+        }
+
+        .ann-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .ann-body strong { display: block; font-size: 0.9rem; margin-bottom: 3px; }
+        .ann-body span { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* ===================== ACTION BUTTONS ===================== */
+        .btn {
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.15s;
+        }
+
+        .btn:hover { opacity: 0.85; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-green { background: rgba(74,222,128,0.2); color: var(--green); }
+        .btn-red { background: rgba(248,113,113,0.2); color: var(--red); }
+        .btn-gray { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+        .btn-purple { background: var(--purple); color: white; padding: 8px 20px; border-radius: var(--radius-sm); font-size: 0.85rem; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted); }
+
+        /* ===================== USER MANAGEMENT ===================== */
+        .user-list-wrap {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-list-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--text-muted);
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-item:last-child { border-bottom: none; }
+
+        .user-info { flex: 1; min-width: 0; }
+        .user-info strong { display: block; font-size: 0.92rem; font-weight: 700; }
+        .user-info span { font-size: 0.75rem; color: var(--text-muted); }
+
+        .user-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+        /* ===================== ADMIN MANAGEMENT ===================== */
+        .admin-list-wrap {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .admin-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        /* ===================== AUDIT LOGS FULL ===================== */
+        .audit-full-wrap {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .audit-full-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .filter-select {
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* ===================== SYSTEM SETTINGS ===================== */
+        .settings-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .settings-section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .setting-row:last-child { border-bottom: none; }
+
+        .setting-info strong {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .setting-info span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .setting-control { flex-shrink: 0; }
+
+        /* Toggle Switch */
+        .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .toggle input { display: none; }
+
+        .toggle-track {
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: left 0.2s;
+        }
+
+        .toggle input:checked + .toggle-track { background: var(--purple); }
+        .toggle input:checked + .toggle-track::after { left: 23px; }
+
+        .setting-input {
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            width: 200px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .setting-input:focus { border-color: var(--purple); }
+
+        /* ===================== ANNOUNCEMENTS PAGE ===================== */
+        .ann-create-box {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ann-form { display: none; }
+        .ann-form.active { display: block; }
+
+        .ann-trigger {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .ann-trigger i { color: var(--purple); }
+        .ann-trigger:hover { color: var(--text); }
+
+        .ann-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            outline: none;
+            resize: vertical;
+        }
+
+        .ann-input:focus { border-color: var(--purple); }
+
+        .ann-feed-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ann-feed-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+        .ann-feed-content { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+        .ann-feed-meta { font-size: 0.78rem; color: var(--purple); font-weight: 600; }
+
+        /* ===================== LOADING ===================== */
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            padding: 20px 0;
+        }
+
+        /* ===================== EMPTY STATE ===================== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            display: block;
+            opacity: 0.4;
+        }
+
+        /* ===================== TOAST ===================== */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--bg-card);
+            border: 1px solid rgba(192,132,252,0.3);
+            color: var(--text);
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            max-width: 300px;
+        }
+
+        .toast.show { display: flex; align-items: center; gap: 10px; }
+        .toast i { color: var(--purple); }
+
+        /* ===================== MODAL ===================== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 28px;
+            width: 440px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 18px; }
+
+        .modal-field { margin-bottom: 14px; }
+        .modal-field label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .modal-field input, .modal-field select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .modal-field input:focus, .modal-field select:focus { border-color: var(--purple); }
+
+        .modal-actions-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* ===================== SCROLLBAR ===================== */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+/* ==========================================
+   ULTIMATE ANIMATIONS & PHYSICS
+   ========================================== */
+@keyframes ambientDrift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+body {
+    background: linear-gradient(-45deg, var(--bg-color), #fdf2e9, #fff9f0, var(--bg-color));
+    background-size: 400% 400%;
+    animation: ambientDrift 20s ease infinite;
+}
+.btn, .stat-card, .data-card, .table-row, .modal-box {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.stat-card:hover, .data-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+@keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+.btn-purple {
+    position: relative;
+    overflow: hidden;
+    background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+    background-size: 200% auto;
+    animation: shimmer 3s infinite linear;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.view.active, .modal-box {
+    animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <span class="paw-icon"><i class="fa-solid fa-paw"></i></span>
+            <h1>FurSafe</h1>
+            <p>Super Admin Portal</p>
+        </div>
+        <div class="login-field">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="superadmin@fursafe.com">
+        </div>
+        <div class="login-field">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••••">
+        </div>
+        <button class="login-btn" id="loginBtn">Sign In</button>
+        <div class="login-error" id="loginError"><i class="fa-solid fa-circle-exclamation"></i> <span id="loginErrorMsg">Invalid credentials.</span></div>
+    </div>
+</div>
+
+<!-- ==================== ADMIN PANEL ==================== -->
+<div id="admin-panel">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <i class="fa-solid fa-paw"></i> FurSafe
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-initials" id="sidebarInitials">SA</div>
+            <div class="profile-name" id="sidebarName">Loading...</div>
+            <span class="profile-badge">Super Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-view="dashboard">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </button>
+            <button class="nav-item" data-view="admin-management">
+                <i class="fa-solid fa-shield-halved"></i> Admin Management
+            </button>
+            <button class="nav-item" data-view="user-management">
+                <i class="fa-solid fa-user-group"></i> User Management
+            </button>
+            <button class="nav-item" data-view="audit-logs">
+                <i class="fa-solid fa-clock-rotate-left"></i> Audit Logs
+            </button>
+            <button class="nav-item" data-view="announcements">
+                <i class="fa-solid fa-bullhorn"></i> Announcements
+            </button>
+            <button class="nav-item" data-view="post-management">
+                <i class="fa-solid fa-layer-group"></i> Post Management
+            </button>
+            <button class="nav-item" data-view="system-settings">
+                <i class="fa-solid fa-gear"></i> System Settings
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="nav-item logout" id="logoutBtn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="top-bar-title">
+                <i class="fa-solid fa-border-all" id="topBarIcon"></i>
+                <span id="topBarTitle">System Dashboard</span>
+            </div>
+            <div class="top-bar-right">
+                <span class="top-bar-meta" id="topBarMeta"></span>
+                <button class="icon-btn" title="Settings" id="goSettings"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </div>
+
+        <div class="views-wrap">
+
+            <!-- ========== DASHBOARD ========== -->
+            <section class="view active" id="view-dashboard">
+                <div class="stats-row">
+                    <div class="stat-card purple">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="dTotalUsers">—</div>
+                        <div class="stat-sub" id="dUsersSub">Barangay 21</div>
+                    </div>
+                    <div class="stat-card yellow">
+                        <div class="stat-label">Total Pets Registered</div>
+                        <div class="stat-value" id="dTotalPets">—</div>
+                        <div class="stat-sub" id="dPetsSub">Loading...</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-label">Active Admins</div>
+                        <div class="stat-value" id="dActiveAdmins">—</div>
+                        <div class="stat-sub">Currently active</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-label">System Status</div>
+                        <div class="stat-value" style="font-size:1.4rem;" id="dSystemStatus">Optimal</div>
+                        <div class="stat-sub" id="dSystemSub">All systems operational</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Admin Accounts</span>
+                            <span class="card-link" data-view="admin-management">Manage →</span>
+                        </div>
+                        <div id="dashAdminList"><div class="loading-text">Loading...</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Announcements</span>
+                            <span class="card-link" data-view="announcements">View all →</span>
+                        </div>
+                        <div id="dashAnnList"><div class="loading-text">Loading...</div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Audit Logs — Recent actions</span>
+                        <span class="card-link" data-view="audit-logs">View all →</span>
+                    </div>
+                    <div id="dashAuditList"><div class="loading-text">Loading...</div></div>
+                </div>
+            </section>
+
+            <!-- ========== ADMIN MANAGEMENT ========== -->
+            <section class="view" id="view-admin-management">
+                <div class="admin-list-wrap">
+                    <div class="admin-list-header">
+                        <span style="color:var(--text-muted); font-size:0.9rem; font-weight:600;" id="adminCountLabel">All Admin accounts</span>
+                        <button class="btn btn-purple" id="openAddAdminModal"><i class="fa-solid fa-plus"></i> Add Admin</button>
+                    </div>
+                    <div id="adminMgmtList"><div class="loading-text">Loading...</div></div>
+                </div>
+            </section>
+
+            <!-- ========== USER MANAGEMENT ========== -->
+            <section class="view" id="view-user-management">
+                <div class="user-list-wrap">
+                    <div class="user-list-title" id="userCountLabel">All registered users</div>
+                    <div id="userMgmtList"><div class="loading-text">Loading...</div></div>
+                </div>
+            </section>
+
+            <!-- ========== AUDIT LOGS ========== -->
+            <section class="view" id="view-audit-logs">
+                <div class="audit-full-wrap">
+                    <div class="audit-full-header">
+                        <span class="card-title">All Admin Actions</span>
+                        <select class="filter-select" id="auditFilter">
+                            <option value="">Filter by admin</option>
+                        </select>
+                    </div>
+                    <div id="auditFullList"><div class="loading-text">Loading...</div></div>
+                </div>
+            </section>
+
+            <!-- ========== ANNOUNCEMENTS ========== -->
+            <section class="view" id="view-announcements">
+                <div class="ann-create-box">
+                    <div class="ann-trigger" id="annTrigger">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Create new announcement for Barangay 21...</span>
+                    </div>
+                    <div class="ann-form" id="annForm">
+                        <input type="text" class="ann-input" id="annTitle" placeholder="Announcement Title">
+                        <textarea class="ann-input" id="annContent" rows="4" placeholder="Write your announcement here..."></textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <button class="btn btn-outline" id="annCancel">Cancel</button>
+                            <button class="btn btn-purple" id="annPost">Post</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="annFeed"><div class="loading-text">Loading...</div></div>
+            </section>
+
+            <!-- ========== POST MANAGEMENT ========== -->
+            <section class="view" id="view-post-management">
+                <div class="audit-full-wrap">
+                    <div class="audit-full-header">
+                        <span class="card-title">All Community Posts</span>
+                        <span style="font-size:0.82rem;color:var(--text-muted);">Delete any post from any user or admin</span>
+                    </div>
+                    <div id="postMgmtList"><div class="loading-text">Loading...</div></div>
+                </div>
+            </section>
+
+            <!-- ========== SYSTEM SETTINGS ========== -->
+            <section class="view" id="view-system-settings">
+                <div class="settings-section">
+                    <div class="settings-section-title">Registration Settings</div>
+
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <strong>Allow new registrations</strong>
+                            <span>Toggle to open or close sign ups</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="settingAllowReg" checked>
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <strong>Require admin approval for pets</strong>
+                            <span>Pets need manual approval before active</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="settingPetApproval" checked>
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Admin Account Settings</div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <strong>Allow admin to post announcements</strong>
+                            <span>Admin can post to their barangay</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="settingAdminAnn" checked>
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <strong>Allow admin to delete reported posts</strong>
+                            <span>Admin can moderate reported community posts</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="settingAdminDelete" checked>
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Website Availability</div>
+
+                    <div class="setting-row" style="border-left:4px solid var(--red); padding-left:16px;">
+                        <div class="setting-info">
+                            <strong style="color:var(--red);">Maintenance Mode</strong>
+                            <span>Turning this ON will show a maintenance page to all users. They will NOT be able to use the site.</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle">
+                                <input type="checkbox" id="settingMaintenance">
+                                <div class="toggle-track"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-row" style="margin-top:10px;">
+                        <div class="setting-info">
+                            <strong>Website Status</strong>
+                            <span>Current status indicator. Maintenance = site is down for users.</span>
+                        </div>
+                        <div class="setting-control">
+                            <span id="websiteStatusBadge" style="padding:6px 16px; border-radius:20px; font-size:0.8rem; font-weight:700; background:rgba(74,222,128,0.2); color:var(--green);">🟢 ONLINE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-purple" id="saveSettingsBtn" style="padding:10px 28px; font-size:0.9rem;">Save Settings</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<!-- ADD ADMIN MODAL -->
+<div class="modal-overlay" id="addAdminModal">
+    <div class="modal-box">
+        <h3><i class="fa-solid fa-user-plus" style="color:var(--purple); margin-right:8px;"></i>Add New Admin</h3>
+        <div class="modal-field">
+            <label>LOGIN ID</label>
+            <input type="text" id="newAdminId" class="no-symbols" placeholder="e.g. admin006">
+        </div>
+        <div class="modal-field">
+            <label>FULL NAME</label>
+            <input type="text" id="newAdminName" class="letters-only" placeholder="e.g. Juan Dela Cruz">
+        </div>
+        <div class="modal-field">
+            <label>PASSWORD</label>
+            <input type="password" id="newAdminPass" placeholder="Set a password">
+        </div>
+
+        <div class="modal-actions-row">
+            <button class="btn btn-outline" id="closeAddAdminModal">Cancel</button>
+            <button class="btn btn-purple" id="confirmAddAdmin">Create Admin</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Done!</span>
+</div>
+
+<script>
+// ==========================================
+// UNIVERSAL STRICT VALIDATION ENGINE
+// ==========================================
+document.addEventListener('input', (e) => {
+    if (!e.target || !e.target.tagName) return;
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') return;
+
+    if (e.target.classList.contains('no-digits') || e.target.classList.contains('letters-only')) {
+        let val = e.target.value.replace(/[^a-zA-Z\s\-ñÑ]/g, '');
+        val = val.replace(/  +/g, ' ');
+        if (e.target.value !== val) e.target.value = val;
+    }
+    if (e.target.classList.contains('only-numbers') || e.target.classList.contains('numbers-only')) {
+        let val = e.target.value.replace(/[^0-9]/g, '');
+        if (e.target.value !== val) e.target.value = val;
+    }
+    if (e.target.classList.contains('no-symbols')) {
+        let val = e.target.value.replace(/[^a-zA-Z0-9\s\-ñÑ]/g, '');
+        if (e.target.value !== val) e.target.value = val;
+    }
+});
+const SUPABASE_URL = 'https://hfpibrfnbdohfjgengim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmcGlicmZuYmRvaGZqZ2VuZ2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1OTQzNzksImV4cCI6MjA5NzE3MDM3OX0.CiaPTLaVK1HbTUafQdkW-mBV9GTqAOGohGzb-u-56nk';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentSuperAdmin = null;
+
+// ========================= HELPERS =========================
+function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    const icon = t.querySelector('i');
+    document.getElementById('toastMsg').textContent = msg;
+    icon.className = isError ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
+    t.style.borderColor = isError ? 'rgba(248,113,113,0.4)' : 'rgba(192,132,252,0.3)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function getInitials(name) {
+    if (!name) return 'SA';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+}
+
+const AVATAR_COLORS = ['av-purple', 'av-pink', 'av-blue', 'av-green', 'av-orange', 'av-teal', 'av-red'];
+function getAvatarColor(str) {
+    let hash = 0;
+    for (let c of (str || 'x')) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function timeAgo(dateStr) {
+    const diff = (Date.now() - new Date(dateStr)) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 172800) return 'Yesterday';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+function humanDate(d) {
+    return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function getAuditDotClass(action) {
+    if (!action) return 'dot-blue';
+    const a = action.toLowerCase();
+    if (a.includes('approv') || a.includes('vaccin') || a.includes('active')) return 'dot-green';
+    if (a.includes('delet') || a.includes('ban') || a.includes('reject') || a.includes('deactiv')) return 'dot-red';
+    if (a.includes('post') || a.includes('ann') || a.includes('update')) return 'dot-yellow';
+    if (a.includes('promot') || a.includes('super')) return 'dot-purple';
+    return 'dot-blue';
+}
+
+// ========================= LOGIN =========================
+document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+    const errEl = document.getElementById('loginError');
+    const errMsg = document.getElementById('loginErrorMsg');
+    const btn = document.getElementById('loginBtn');
+
+    errEl.style.display = 'none';
+    if (!email || !pass) {
+        errMsg.textContent = 'Please enter email and password.';
+        errEl.style.display = 'flex';
+        return;
+    }
+
+    btn.textContent = 'Signing in...';
+    btn.disabled = true;
+
+    try {
+        const { data, error } = await sb
+            .from('super_admin_accounts')
+            .select('*')
+            .eq('email', email)
+            .eq('password_hash', pass)
+            .eq('is_active', true)
+            .single();
+
+        if (error || !data) {
+            errMsg.textContent = 'Invalid email or password.';
+            errEl.style.display = 'flex';
+            btn.textContent = 'Sign In';
+            btn.disabled = false;
+
+            // Log failed attempt
+            await sb.from('login_attempts').insert({ email, success: false });
+            return;
+        }
+
+        // Log successful attempt
+        await sb.from('login_attempts').insert({ email, success: true });
+
+        // Update last_login
+        await sb.from('super_admin_accounts').update({ last_login: new Date().toISOString() }).eq('id', data.id);
+
+        currentSuperAdmin = data;
+        localStorage.setItem('fursafe_superadmin', JSON.stringify(data));
+
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('admin-panel').classList.add('active');
+        initPanel();
+    } catch (e) {
+        errMsg.textContent = 'Something went wrong. Try again.';
+        errEl.style.display = 'flex';
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+    }
+});
+
+// Enter key login
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+// Check existing session
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('fursafe_superadmin');
+    if (saved) {
+        currentSuperAdmin = JSON.parse(saved);
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('admin-panel').classList.add('active');
+        initPanel();
+    }
+});
+
+// ========================= LOGOUT =========================
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('fursafe_superadmin');
+    document.getElementById('admin-panel').classList.remove('active');
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginBtn').textContent = 'Sign In';
+    document.getElementById('loginBtn').disabled = false;
+});
+
+// ========================= ROUTING =========================
+const VIEW_META = {
+    'dashboard':         { icon: 'fa-solid fa-border-all',        title: 'System Dashboard' },
+    'admin-management':  { icon: 'fa-solid fa-shield-halved',     title: 'Admin Management' },
+    'user-management':   { icon: 'fa-solid fa-user-group',        title: 'User Management' },
+    'audit-logs':        { icon: 'fa-solid fa-clock-rotate-left', title: 'Audit Logs' },
+    'announcements':     { icon: 'fa-solid fa-bullhorn',          title: 'Announcements' },
+    'post-management':   { icon: 'fa-solid fa-layer-group',       title: 'Post Management' },
+    'system-settings':   { icon: 'fa-solid fa-gear',              title: 'System Settings' },
+};
+
+function navigateTo(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item[data-view]').forEach(n => n.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    document.querySelector(`.nav-item[data-view="${viewId}"]`).classList.add('active');
+
+    const meta = VIEW_META[viewId] || {};
+    document.getElementById('topBarIcon').className = meta.icon || 'fa-solid fa-border-all';
+    document.getElementById('topBarTitle').textContent = meta.title || viewId;
+
+    loadView(viewId);
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => navigateTo(btn.dataset.view));
+});
+
+document.querySelectorAll('.card-link[data-view]').forEach(link => {
+    link.addEventListener('click', () => navigateTo(link.dataset.view));
+});
+
+document.getElementById('goSettings').addEventListener('click', () => navigateTo('system-settings'));
+
+// ========================= INIT =========================
+function initPanel() {
+    // Sidebar name + initials
+    const name = currentSuperAdmin?.name || 'Super Admin';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarInitials').textContent = getInitials(name);
+
+    // Top bar date
+    document.getElementById('topBarMeta').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    navigateTo('dashboard');
+}
+
+function loadView(viewId) {
+    switch (viewId) {
+        case 'dashboard': loadDashboard(); break;
+        case 'admin-management': loadAdminManagement(); break;
+        case 'user-management': loadUserManagement(); break;
+        case 'audit-logs': loadAuditLogs(); break;
+        case 'announcements': loadAnnouncements(); break;
+        case 'post-management': loadPostManagement(); break;
+        case 'system-settings': loadSystemSettings(); break;
+    }
+}
+
+// ========================= DASHBOARD =========================
+async function loadDashboard() {
+    const [profilesRes, petsRes, adminsRes, logsRes, annsRes] = await Promise.all([
+        sb.from('profiles').select('id, is_active', { count: 'exact' }),
+        sb.from('pets').select('id, created_at', { count: 'exact' }),
+        sb.from('admin_accounts').select('*').order('created_at', { ascending: true }),
+        sb.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(6),
+        sb.from('announcements').select('*').order('created_at', { ascending: false }).limit(3),
+    ]);
+
+    const totalUsers = profilesRes.data?.length || 0;
+    const totalPets = petsRes.data?.length || 0;
+    const thisMonth = (petsRes.data || []).filter(p => {
+        const d = new Date(p.created_at), n = new Date();
+        return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+    }).length;
+    const activeAdmins = (adminsRes.data || []).filter(a => a.is_active && a.status === 'active').length;
+
+    document.getElementById('dTotalUsers').textContent = totalUsers.toLocaleString();
+    document.getElementById('dTotalPets').textContent = totalPets.toLocaleString();
+    document.getElementById('dPetsSub').textContent = '+' + thisMonth + ' this month';
+    document.getElementById('dActiveAdmins').textContent = activeAdmins;
+
+    // Admin list
+    const adminListEl = document.getElementById('dashAdminList');
+    adminListEl.innerHTML = '';
+    const admins = adminsRes.data || [];
+    if (admins.length === 0) {
+        adminListEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-shield-halved"></i>No admin accounts</div>';
+    } else {
+        admins.slice(0, 4).forEach(a => {
+            const initials = getInitials(a.name);
+            const avColor = getAvatarColor(a.name);
+            const isSuper = a.role === 'super_admin';
+            adminListEl.innerHTML += `
+                <div class="admin-item">
+                    <div class="avatar-circle ${avColor}">${initials}</div>
+                    <div class="admin-info">
+                        <strong>${a.name}</strong>
+                        <span>${a.admin_login_id} · ${a.barangay || 'BRGY 21'}</span>
+                    </div>
+                    <div class="badges-row">
+                        <span class="badge ${isSuper ? 'badge-superadmin' : 'badge-admin'}">${isSuper ? 'Super Admin' : 'Admin'}</span>
+                        <span class="badge ${a.is_active ? 'badge-active' : 'badge-inactive'}">${a.is_active ? 'Active' : 'Inactive'}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    // Announcements
+    const annListEl = document.getElementById('dashAnnList');
+    annListEl.innerHTML = '';
+    const anns = annsRes.data || [];
+    if (anns.length === 0) {
+        annListEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i>No announcements yet</div>';
+    } else {
+        anns.forEach(a => {
+            let content = a.content || '';
+            const match = content.match(/^\[AUTHOR:(.*?)\](.*)/s);
+            const author = match ? match[1] : 'Admin';
+            annListEl.innerHTML += `
+                <div class="ann-card">
+                    <div class="ann-icon"><i class="fa-solid fa-paw" style="color:white;font-size:0.8rem;"></i></div>
+                    <div class="ann-body">
+                        <strong>${a.title}</strong>
+                        <span>Posted by ${author} · Admin</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    // Audit logs
+    const auditEl = document.getElementById('dashAuditList');
+    auditEl.innerHTML = '';
+    const logs = logsRes.data || [];
+    if (logs.length === 0) {
+        auditEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-clock-rotate-left"></i>No activity yet</div>';
+    } else {
+        logs.forEach(log => {
+            const dotClass = getAuditDotClass(log.action);
+            auditEl.innerHTML += `
+                <div class="audit-item">
+                    <div class="audit-dot ${dotClass}"></div>
+                    <div class="audit-text">
+                        ${log.details || log.action || 'Admin action'}
+                        <span class="audit-by">By: ${log.admin_id || '—'} · Admin</span>
+                    </div>
+                    <div class="audit-time">${timeAgo(log.created_at)}</div>
+                </div>`;
+        });
+    }
+}
+
+// ========================= ADMIN MANAGEMENT =========================
+async function loadAdminManagement() {
+    const el = document.getElementById('adminMgmtList');
+    el.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    // Fetch both super admins and regular admins
+    const [superRes, adminRes] = await Promise.all([
+        sb.from('super_admin_accounts').select('*').order('created_at', { ascending: true }),
+        sb.from('admin_accounts').select('*').order('created_at', { ascending: true }),
+    ]);
+
+    const superAdmins = superRes.data || [];
+    const admins = adminRes.data || [];
+    const total = superAdmins.length + admins.length;
+
+    document.getElementById('adminCountLabel').textContent = total + ' Admin account' + (total !== 1 ? 's' : '');
+    el.innerHTML = '';
+
+    // Super admins first (no deactivate button)
+    superAdmins.forEach(sa => {
+        const initials = getInitials(sa.name);
+        const avColor = getAvatarColor(sa.name);
+        const isSelf = currentSuperAdmin && sa.id === currentSuperAdmin.id;
+        el.innerHTML += `
+            <div class="admin-item">
+                <div class="avatar-circle ${avColor}">${initials}</div>
+                <div class="admin-info">
+                    <strong>${sa.name}${isSelf ? ' (You)' : ''}</strong>
+                    <span>SUPER ADMIN · FURSAFE-001 · BRGY 21</span>
+                </div>
+                <div class="badges-row">
+                    <span class="badge badge-superadmin">Super Admin</span>
+                    <span class="badge badge-active">Active</span>
+                </div>
+            </div>`;
+    });
+
+    // Regular admins
+    admins.forEach((a, idx) => {
+        const initials = getInitials(a.name);
+        const avColor = getAvatarColor(a.name);
+        const isActive = a.is_active !== false && a.status !== 'deactivated';
+        el.innerHTML += `
+            <div class="admin-item" id="admin-row-${a.admin_login_id}">
+                <div class="avatar-circle ${avColor}">${initials}</div>
+                <div class="admin-info">
+                    <strong>${a.name}</strong>
+                    <span>ADMIN · ${a.admin_login_id} · ${a.barangay || 'BRGY 21'}</span>
+                </div>
+                <div class="badges-row">
+                    <span class="badge badge-admin">Admin</span>
+                    <span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">${isActive ? 'Active' : 'Inactive'}</span>
+                    <button class="btn ${isActive ? 'btn-red' : 'btn-green'}" onclick="toggleAdmin('${a.admin_login_id}', ${isActive})">
+                        ${isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                </div>
+            </div>`;
+    });
+
+    if (el.innerHTML === '') {
+        el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-shield-halved"></i>No admins found</div>';
+    }
+}
+
+async function toggleAdmin(loginId, currentlyActive) {
+    const newActive = !currentlyActive;
+    const newStatus = newActive ? 'active' : 'deactivated';
+
+    const { error } = await sb.from('admin_accounts')
+        .update({ is_active: newActive, status: newStatus })
+        .eq('admin_login_id', loginId);
+
+    if (error) { showToast('Failed to update admin.', true); return; }
+
+    // Log action
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: newActive ? 'activate_admin' : 'deactivate_admin',
+        target_id: loginId,
+        target_type: 'admin_account',
+        details: (newActive ? 'Activated' : 'Deactivated') + ' admin account: ' + loginId,
+        barangay: 'BRGY 21'
+    });
+
+    showToast('Admin ' + (newActive ? 'activated' : 'deactivated') + ' successfully.');
+    loadAdminManagement();
+}
+
+// Add Admin Modal
+document.getElementById('openAddAdminModal').addEventListener('click', () => {
+    document.getElementById('addAdminModal').classList.add('active');
+});
+document.getElementById('closeAddAdminModal').addEventListener('click', () => {
+    document.getElementById('addAdminModal').classList.remove('active');
+});
+
+document.getElementById('confirmAddAdmin').addEventListener('click', async () => {
+    const loginId = document.getElementById('newAdminId').value.trim();
+    const name = document.getElementById('newAdminName').value.trim();
+    const pass = document.getElementById('newAdminPass').value.trim();
+    const brgy = 'Brgy 21';
+
+    if (!loginId || !name || !pass) { showToast('Please fill all fields.', true); return; }
+
+    const { error } = await sb.from('admin_accounts').insert({
+        admin_login_id: loginId,
+        name,
+        password: pass,
+        barangay: brgy,
+        role: 'admin',
+        is_active: true,
+        status: 'active'
+    });
+
+    if (error) { showToast('Failed to create admin: ' + error.message, true); return; }
+
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: 'create_admin',
+        target_id: loginId,
+        target_type: 'admin_account',
+        details: 'Created new admin account: ' + name + ' (' + loginId + ')',
+        barangay: brgy
+    });
+
+    document.getElementById('addAdminModal').classList.remove('active');
+    document.getElementById('newAdminId').value = '';
+    document.getElementById('newAdminName').value = '';
+    document.getElementById('newAdminPass').value = '';
+    showToast('Admin account created!');
+    loadAdminManagement();
+});
+
+// ========================= USER MANAGEMENT =========================
+async function loadUserManagement() {
+    const el = document.getElementById('userMgmtList');
+    el.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    const { data: users, error } = await sb
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error || !users) { el.innerHTML = '<div class="empty-state">Failed to load users.</div>'; return; }
+
+    document.getElementById('userCountLabel').textContent = users.length.toLocaleString() + ' total users';
+    el.innerHTML = '';
+
+    if (users.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-user-group"></i>No users found</div>';
+        return;
+    }
+
+    users.forEach((u, idx) => {
+        const name = (u.first_name || '') + ' ' + (u.last_name || '');
+        const initials = getInitials(name.trim() || 'U');
+        const avColor = getAvatarColor(u.id);
+        const isBanned = u.is_active === false;
+        const posId = '2024-POSXI-' + String(idx + 1).padStart(4, '0');
+
+        el.innerHTML += `
+            <div class="user-item">
+                <div class="avatar-circle ${avColor}">${initials}</div>
+                <div class="user-info">
+                    <strong>${name.trim() || 'Unknown'}</strong>
+                    <span>${posId} · Brgy 21 pet</span>
+                </div>
+                <div class="user-actions">
+                    ${isBanned
+                        ? `<span class="badge badge-banned">Banned</span>
+                           <button class="btn btn-green" onclick="unbanUser('${u.id}')">Unban</button>`
+                        : `<span class="badge badge-active">Active</span>
+                           <button class="btn btn-red" onclick="banUser('${u.id}')">Ban</button>`}
+                    <button class="btn btn-gray">View</button>
+                </div>
+            </div>`;
+    });
+}
+
+async function banUser(userId) {
+    const { error } = await sb.from('profiles').update({ is_active: false }).eq('id', userId);
+    if (error) { showToast('Failed to ban user.', true); return; }
+
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: 'ban_user',
+        target_id: userId,
+        target_type: 'user',
+        details: 'Banned user account: ' + userId,
+        barangay: 'BRGY 21'
+    });
+
+    showToast('User banned.');
+    loadUserManagement();
+}
+
+async function unbanUser(userId) {
+    const { error } = await sb.from('profiles').update({ is_active: true }).eq('id', userId);
+    if (error) { showToast('Failed to unban user.', true); return; }
+
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: 'unban_user',
+        target_id: userId,
+        target_type: 'user',
+        details: 'Unbanned user account: ' + userId,
+        barangay: 'BRGY 21'
+    });
+
+    showToast('User unbanned.');
+    loadUserManagement();
+}
+
+// ========================= AUDIT LOGS =========================
+let allLogs = [];
+async function loadAuditLogs() {
+    const el = document.getElementById('auditFullList');
+    el.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    const { data: logs, error } = await sb
+        .from('admin_logs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) { el.innerHTML = '<div class="empty-state">Failed to load logs.</div>'; return; }
+
+    allLogs = logs || [];
+    renderAuditLogs(allLogs);
+
+    // Populate filter
+    const filter = document.getElementById('auditFilter');
+    const adminIds = [...new Set(allLogs.map(l => l.admin_id).filter(Boolean))];
+    filter.innerHTML = '<option value="">Filter by admin</option>';
+    adminIds.forEach(id => {
+        filter.innerHTML += `<option value="${id}">${id}</option>`;
+    });
+}
+
+function renderAuditLogs(logs) {
+    const el = document.getElementById('auditFullList');
+    el.innerHTML = '';
+
+    if (!logs || logs.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-clock-rotate-left"></i>No activity logs yet</div>';
+        return;
+    }
+
+    logs.forEach(log => {
+        const dotClass = getAuditDotClass(log.action);
+        el.innerHTML += `
+            <div class="audit-item">
+                <div class="audit-dot ${dotClass}"></div>
+                <div class="audit-text">
+                    ${log.details || log.action || 'Admin action'}
+                    <span class="audit-by">By: ${log.admin_id || '—'} · ${log.barangay ? 'Admin' : 'System'}</span>
+                </div>
+                <div class="audit-time">${timeAgo(log.created_at)}</div>
+            </div>`;
+    });
+}
+
+document.getElementById('auditFilter').addEventListener('change', function () {
+    const val = this.value;
+    if (!val) renderAuditLogs(allLogs);
+    else renderAuditLogs(allLogs.filter(l => l.admin_id === val));
+});
+
+// ========================= ANNOUNCEMENTS =========================
+async function loadAnnouncements() {
+    const feed = document.getElementById('annFeed');
+    feed.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    const { data: anns, error } = await sb
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) { feed.innerHTML = '<div class="empty-state">Failed to load.</div>'; return; }
+
+    feed.innerHTML = '';
+    if (!anns || anns.length === 0) {
+        feed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i>No announcements yet</div>';
+        return;
+    }
+
+    anns.forEach(a => {
+        let content = a.content || '';
+        const match = content.match(/^\[AUTHOR:(.*?)\](.*)/s);
+        const author = match ? match[1] : 'Super Admin';
+        if (match) content = match[2];
+
+        const card = document.createElement('div');
+        card.className = 'ann-feed-card';
+        card.style.position = 'relative';
+        card.innerHTML = `
+            <div class="ann-feed-title">${a.title}</div>
+            <div class="ann-feed-content">${content}</div>
+            <div class="ann-feed-meta">Posted by ${author} | ${humanDate(a.created_at)}</div>
+            <button class="btn btn-outline" style="position:absolute;top:14px;right:14px;padding:4px 12px;font-size:0.78rem;color:var(--red);border-color:var(--red);" data-ann-time="${a.created_at}"><i class="fa-solid fa-trash"></i> Delete</button>`;
+        card.querySelector('[data-ann-time]').addEventListener('click', async (e) => {
+            const t = e.currentTarget.dataset.annTime;
+            if (!confirm('Delete this announcement?')) return;
+            const { error } = await sb.from('announcements').delete().eq('created_at', t);
+            if (error) { showToast('Failed to delete: ' + error.message, true); return; }
+            await sb.from('admin_logs').insert({
+                admin_id: currentSuperAdmin?.admin_login_id || currentSuperAdmin?.id,
+                action: 'delete_announcement',
+                target_type: 'announcement',
+                details: 'Deleted announcement: ' + a.title,
+                barangay: 'all'
+            });
+            showToast('Announcement deleted.');
+            loadAnnouncements();
+        });
+        feed.appendChild(card);
+    });
+}
+
+// Announcement toggle
+document.getElementById('annTrigger').addEventListener('click', () => {
+    document.getElementById('annForm').classList.add('active');
+    document.getElementById('annTrigger').style.display = 'none';
+});
+
+document.getElementById('annCancel').addEventListener('click', () => {
+    document.getElementById('annForm').classList.remove('active');
+    document.getElementById('annTrigger').style.display = 'flex';
+    document.getElementById('annTitle').value = '';
+    document.getElementById('annContent').value = '';
+});
+
+document.getElementById('annPost').addEventListener('click', async () => {
+    const title = document.getElementById('annTitle').value.trim();
+    const content = document.getElementById('annContent').value.trim();
+    if (!title || !content) { showToast('Please fill title and content.', true); return; }
+
+    const authorName = currentSuperAdmin?.name || 'Super Admin';
+    const fullContent = `[AUTHOR:${authorName}]${content}`;
+
+    const { error } = await sb.from('announcements').insert({
+        title,
+        content: fullContent,
+        barangay: 'all',
+        admin_id: currentSuperAdmin?.id || null
+    });
+
+    if (error) { showToast('Failed to post: ' + error.message, true); return; }
+
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: 'post_announcement',
+        target_type: 'announcement',
+        details: 'Posted announcement: ' + title,
+        barangay: 'all'
+    });
+
+    showToast('Announcement posted!');
+    document.getElementById('annCancel').click();
+    loadAnnouncements();
+});
+
+// ========================= POST MANAGEMENT =========================
+async function loadPostManagement() {
+    const el = document.getElementById('postMgmtList');
+    el.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    const { data: posts, error } = await sb
+        .from('posts')
+        .select('id, content, created_at, author_id, category1, category2, image_url')
+        .order('created_at', { ascending: false });
+
+    if (error) { el.innerHTML = '<div class="empty-state">Failed to load posts.<br><small style="color:var(--text-muted);">' + error.message + '</small></div>'; return; }
+    if (!posts || posts.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-layer-group"></i> No posts found.</div>';
+        return;
+    }
+
+    el.innerHTML = '';
+    for (const post of posts) {
+        let authorName = 'Unknown User';
+        try {
+            const { data: profile } = await sb.from('profiles').select('first_name, last_name').eq('id', post.author_id).single();
+            if (profile) authorName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+        } catch(e) {}
+
+        const cats = [post.category1, post.category2].filter(Boolean).join(', ') || 'No category';
+
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.style.cssText = 'display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);position:relative;';
+        row.innerHTML = `
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.88rem;font-weight:600;color:var(--text);">${authorName}</div>
+                <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;white-space:pre-wrap;word-break:break-word;">${(post.content || '').slice(0, 200)}${(post.content || '').length > 200 ? '…' : ''}</div>
+                <div style="font-size:0.75rem;color:var(--purple);margin-top:6px;">${humanDate(post.created_at)} &bull; ${cats}</div>
+            </div>
+            <button class="btn btn-outline" style="flex-shrink:0;padding:6px 14px;font-size:0.8rem;color:var(--red);border-color:var(--red);" data-post-id="${post.id}"><i class="fa-solid fa-trash"></i> Delete</button>`;
+        row.querySelector('[data-post-id]').addEventListener('click', async (e) => {
+            const pid = e.currentTarget.dataset.postId;
+            if (!confirm('Permanently delete this post? This cannot be undone.')) return;
+            const { error: delErr } = await sb.from('posts').delete().eq('id', pid);
+            if (delErr) { showToast('Failed to delete: ' + delErr.message, true); return; }
+            await sb.from('admin_logs').insert({
+                admin_id: currentSuperAdmin?.admin_login_id || currentSuperAdmin?.id,
+                action: 'delete_post',
+                target_id: pid,
+                target_type: 'post',
+                details: 'Super Admin deleted a community post.',
+                barangay: 'all'
+            });
+            showToast('Post deleted.');
+            loadPostManagement();
+        });
+        el.appendChild(row);
+    }
+}
+
+// ========================= SYSTEM SETTINGS =========================
+const SETTING_KEYS = {
+    'registration_open': 'settingAllowReg',
+    'require_pet_approval': 'settingPetApproval',
+    'allow_admin_announcements': 'settingAdminAnn',
+    'allow_admin_delete_posts': 'settingAdminDelete',
+    'app_maintenance_mode': 'settingMaintenance',
+};
+
+async function loadSystemSettings() {
+    const { data: settings } = await sb.from('system_settings').select('*');
+    if (!settings) return;
+
+    settings.forEach(s => {
+        const elemId = SETTING_KEYS[s.key];
+        if (!elemId) return;
+        const el = document.getElementById(elemId);
+        if (!el) return;
+        if (el.type === 'checkbox') {
+            el.checked = s.value === 'true';
+        } else {
+            el.value = s.value || '';
+        }
+    });
+
+    // Update website status badge
+    const maintenanceSetting = settings.find(s => s.key === 'app_maintenance_mode');
+    const statusBadge = document.getElementById('websiteStatusBadge');
+    if (statusBadge) {
+        if (maintenanceSetting && maintenanceSetting.value === 'true') {
+            statusBadge.textContent = '🔴 UNDER MAINTENANCE';
+            statusBadge.style.background = 'rgba(248,113,113,0.2)';
+            statusBadge.style.color = 'var(--red)';
+        } else {
+            statusBadge.textContent = '🟢 ONLINE';
+            statusBadge.style.background = 'rgba(74,222,128,0.2)';
+            statusBadge.style.color = 'var(--green)';
+        }
+    }
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+    const updates = [
+        { key: 'registration_open', value: document.getElementById('settingAllowReg').checked ? 'true' : 'false' },
+        { key: 'require_pet_approval', value: document.getElementById('settingPetApproval').checked ? 'true' : 'false' },
+        { key: 'allow_admin_announcements', value: document.getElementById('settingAdminAnn').checked ? 'true' : 'false' },
+        { key: 'allow_admin_delete_posts', value: document.getElementById('settingAdminDelete').checked ? 'true' : 'false' },
+        { key: 'app_maintenance_mode', value: document.getElementById('settingMaintenance')?.checked ? 'true' : 'false' },
+    ];
+
+    for (const u of updates) {
+        await sb.from('system_settings').upsert({ key: u.key, value: u.value, updated_by: currentSuperAdmin?.id, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    }
+
+    await sb.from('admin_logs').insert({
+        admin_id: currentSuperAdmin?.id,
+        action: 'update_settings',
+        target_type: 'system',
+        details: 'Updated system settings',
+        barangay: 'all'
+    });
+
+    // Update status badge after save
+    const statusBadge = document.getElementById('websiteStatusBadge');
+    const isMaintenanceOn = document.getElementById('settingMaintenance')?.checked;
+    if (statusBadge) {
+        if (isMaintenanceOn) {
+            statusBadge.textContent = '🔴 UNDER MAINTENANCE';
+            statusBadge.style.background = 'rgba(248,113,113,0.2)';
+            statusBadge.style.color = 'var(--red)';
+        } else {
+            statusBadge.textContent = '🟢 ONLINE';
+            statusBadge.style.background = 'rgba(74,222,128,0.2)';
+            statusBadge.style.color = 'var(--green)';
+        }
+    }
+
+    showToast('Settings saved successfully!');
+});
+</script>
+</body>
+</html>
