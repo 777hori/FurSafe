@@ -42,13 +42,13 @@
                         <form id="loginForm">
                             <div id="loginFields">
                                 <div class="form-group">
-                                    <label for="brgyId">LOG IN WITH YOUR BARANGGAY ID</label>
+                                    <label for="brgyId">LOG IN WITH YOUR BARANGGAY ID <span style="color:red;">*</span></label>
                                     <input type="text" id="brgyId" placeholder="e.g. 2024-POSXI-9209" required>
                                     <div class="error-message" id="brgyIdError">Invalid format. Only letters, numbers, and hyphens allowed.</div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="password">PASSWORD</label>
+                                    <label for="password">PASSWORD <span style="color:red;">*</span></label>
                                     <div style="position: relative;">
                                         <input type="password" id="password" placeholder="Enter your Password" required>
                                         <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2; font-size: 1rem; min-width: 18px; min-height: 18px; display: block;"></i>
@@ -75,20 +75,20 @@
 
                             <div id="signUpFields" style="display: none;">
                                 <div class="form-group">
-                                    <label>FIRST NAME</label>
+                                    <label>FIRST NAME <span style="color:red;">*</span></label>
                                     <input type="text" id="signupFirstName" class="no-digits" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>LAST NAME</label>
+                                    <label>LAST NAME <span style="color:red;">*</span></label>
                                     <input type="text" id="signupLastName" class="no-digits" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>EMAIL ADDRESS</label>
+                                    <label>EMAIL ADDRESS <span style="color:red;">*</span></label>
                                     <input type="email" id="signupEmail" required>
                                     <div class="error-message" id="emailError">Invalid email. Please use @gmail.com, @yahoo.com, or @outlook.com.</div>
                                 </div>
                                 <div class="form-group">
-                                    <label>BARANGGAY ID</label>
+                                    <label>BARANGGAY ID <span style="color:red;">*</span></label>
                                     <input type="text" id="signupBrgyId" placeholder="e.g. 2024-POSXI-9209" required>
                                     <div class="error-message" id="signupBrgyIdError">Invalid format. e.g. 2024-POSXI-9209</div>
                                 </div>
@@ -103,11 +103,11 @@
                                     <span>ADMIN ACCESS</span>
                                 </div>
                                 <div class="form-group">
-                                    <label for="adminId">ADMIN ID</label>
+                                    <label for="adminId">ADMIN ID <span style="color:red;">*</span></label>
                                     <input type="text" id="adminId" placeholder="e.g. ADMIN-BRGY21-001" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="adminPassword">PASSWORD</label>
+                                    <label for="adminPassword">PASSWORD <span style="color:red;">*</span></label>
                                     <div style="position: relative;">
                                         <input type="password" id="adminPassword" placeholder="Enter admin password" required>
                                         <i class="fa-solid fa-eye-slash" id="toggleAdminPassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2;"></i>
