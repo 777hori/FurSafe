@@ -601,6 +601,7 @@ label {
             display: flex;             
             flex-direction: column;   
             align-items: center;     
+            
 }
 
         .team-avatar {
@@ -614,13 +615,15 @@ label {
             align-items: center;
             justify-content: center;
             overflow: visible;
-    box-shadow: 0 10px 20px rgba(240, 165, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(240, 165, 0, 0.3);
             position: relative;
         }
+
         .team-info {
             margin-top: -25px;  
             text-align: center;
         }
+
         .avatar-img {
             position: absolute;
             top: 50%;
@@ -633,6 +636,7 @@ label {
             z-index: 2;
             box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
+        
         .team-name {
             font-weight: 800;
             font-size: 1rem;
@@ -670,7 +674,6 @@ label {
             .team-grid { grid-template-columns: 1fr; }
         }
 
-    
 
         .community-layout {
             display: grid;
