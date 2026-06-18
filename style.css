@@ -389,12 +389,14 @@ label {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-content {
@@ -585,7 +587,7 @@ label {
         }
 
         .team-card {
-            background-color: #FFDC8A; /* Slightly different cream to stand out from container */
+            background-color: #FDF8F0; /* Slightly different cream to stand out from container */
             border-radius: var(--border-radius-lg);
             padding: 0 15px 20px 15px;
             text-align: center;
@@ -627,12 +629,6 @@ label {
             font-size: 0.8rem;
             color: var(--text-light);
             margin-bottom: 10px;
-        }
-
-        .team-animal {
-            font-size: 0.85rem;
-            color: var(--text-dark);
-            margin-top: 5px;
         }
 
         .team-fav {
