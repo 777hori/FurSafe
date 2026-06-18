@@ -585,7 +585,7 @@ label {
         }
 
         .team-card {
-            background-color: #FDF8F0; /* Slightly different cream to stand out from container */
+            background-color: #F5C842; /* Slightly different cream to stand out from container */
             border-radius: var(--border-radius-lg);
             padding: 0 15px 20px 15px;
             text-align: center;
@@ -627,6 +627,12 @@ label {
             font-size: 0.8rem;
             color: var(--text-light);
             margin-bottom: 10px;
+        }
+
+        .team-animal {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            margin-top: 5px;
         }
 
         .team-fav {
