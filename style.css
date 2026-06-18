@@ -593,37 +593,48 @@ label {
         }
 
         .team-card {
-            background-color: #fcefcb; /* Slightly different cream to stand out from container */
+            background-color: #fcefcb;
             border-radius: var(--border-radius-lg);
             padding: 0 15px 20px 15px;
-            text-align: center;
             position: relative;
-            margin-top: 60px; /* Space for the overlapping avatar */
-        }
+            margin-top: 50px;         
+            display: flex;             
+            flex-direction: column;   
+            align-items: center;     
+}
 
         .team-avatar {
             width: 130px;
             height: 130px;
             background-color: var(--primary);
             border-radius: 50%;
-            margin: 0 auto;
-            transform: translateY(-50%);
+            transform: translateY(-30%);  
             border: 5px solid var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 3rem;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(240, 165, 0, 0.3);
+            overflow: visible;
+    box-shadow: 0 10px 20px rgba(240, 165, 0, 0.3);
+            position: relative;
         }
-
-        /* EDIT HERE: Put img tag inside team-avatar */
 
         .team-info {
-            margin-top: -50px; /* Pull up to compensate for avatar transform */
+            margin-top: -25px;  
+            text-align: center;
         }
 
+        .avatar-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);  
+            width: 150px;                       
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            z-index: 2;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
         .team-name {
             font-weight: 800;
             font-size: 1rem;
@@ -835,6 +846,7 @@ label {
             justify-content: center;
             color: #888;
             font-weight: bold;
+            
         }
         /* EDIT HERE: Add img tags inside .post-image or replace it entirely with an img */
 
