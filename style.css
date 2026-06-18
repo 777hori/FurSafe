@@ -383,20 +383,14 @@ label {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  display: flex !important;
 }
 
 .modal-content {
@@ -406,12 +400,24 @@ label {
   max-width: 500px;
   width: 90%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  transform: translateY(20px);
+  transform: scale(0.9);
   transition: transform 0.3s ease;
+  animation: slideUp 0.3s ease;
 }
 
 .modal-overlay.active .modal-content {
-  transform: translateY(0);
+  transform: scale(1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Form Validation Styles */
