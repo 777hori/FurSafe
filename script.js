@@ -2265,8 +2265,11 @@ async function loadUserAnnouncements() {
             const safeTitle = (ann.title || 'Untitled').replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const safeContent = actualContent.substring(0, 120).replace(/</g, "&lt;").replace(/>/g, "&gt;");
             
+            window.__annModalData = window.__annModalData || [];
+            window.__annModalData[index] = { title: ann.title || 'Untitled', content: actualContent, date: dateStr, author: author };
+
             const htmlItem = `
-                <div class="announcement-item" style="border-left-color: ${borderColor}; background: #f9f9f9; padding: 10px; border-radius: 8px; border-left-width: 4px; border-left-style: solid; margin-bottom: 8px;">
+                <div class="announcement-item" style="border-left-color: ${borderColor}; background: #f9f9f9; padding: 10px; border-radius: 8px; border-left-width: 4px; border-left-style: solid; margin-bottom: 8px; cursor:pointer;" onclick="openAnnouncementModal(${index})">
                     <div class="ann-title" style="font-weight: bold; margin-bottom: 3px; font-size: 0.95rem;">${safeTitle}</div>
                     <div class="ann-content" style="font-size: 0.85rem; color: #555; margin-bottom: 5px;">${safeContent}${actualContent.length > 120 ? '...' : ''}</div>
                     <div class="ann-date" style="font-size: 0.75rem; color: #888;">${dateStr} • By ${author.replace(/</g, "&lt;")}</div>
@@ -2286,6 +2289,26 @@ async function loadUserAnnouncements() {
         if (homeFeed) homeFeed.innerHTML = errMsg;
     }
 }
+
+function openAnnouncementModal(index) {
+    const data = window.__annModalData?.[index];
+    if (!data) return;
+    document.getElementById('annModalTitle').textContent = data.title;
+    document.getElementById('annModalContent').textContent = data.content;
+    document.getElementById('annModalDate').textContent = `${data.date} • By ${data.author}`;
+    document.getElementById('announcementModal').classList.add('active');
+}
+
+document.getElementById('closeAnnouncementModal')?.addEventListener('click', () => {
+    document.getElementById('announcementModal').classList.remove('active');
+});
+
+document.getElementById('announcementModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'announcementModal') {
+        document.getElementById('announcementModal').classList.remove('active');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', loadUserAnnouncements);
 document.querySelector('[data-route="community"]')?.addEventListener('click', () => setTimeout(loadUserAnnouncements, 300));
 document.querySelector('[data-route="home"]')?.addEventListener('click', () => setTimeout(loadUserAnnouncements, 300));
