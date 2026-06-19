@@ -382,10 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { data: logs } = await supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(4);
                 if (logs && logs.length > 0) {
                     eventLogs.innerHTML = '';
-                    logs.forEach(log => {
-                        const dotClass = log.action === 'approve' ? 'dot-green' : (log.action === 'delete' ? 'dot-red' : 'dot-yellow');
-                        eventLogs.innerHTML += '<div class="event-log-item"><div><span class="event-log-dot ' + dotClass + '"></span> ' + log.notes + '</div><div class="event-log-time">' + timeAgo(log.created_at) + '</div></div>';
-                    });
+                  logs.forEach(log => {
+    const dotClass = log.action === 'approve' ? 'dot-green' : (log.action === 'delete' ? 'dot-red' : 'dot-yellow');
+    const actionText = log.notes || log.description || log.message || log.action || 'Activity logged';
+    eventLogs.innerHTML += '<div class="event-log-item"><div><span class="event-log-dot ' + dotClass + '"></span> ' + actionText + '</div><div class="event-log-time">' + timeAgo(log.created_at) + '</div></div>';
+});
                 } else {
                     // Show recent pet registrations as activity if no logs
                     eventLogs.innerHTML = '';
