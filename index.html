@@ -42,13 +42,13 @@
                         <form id="loginForm">
                             <div id="loginFields">
                                 <div class="form-group">
-                                    <label for="brgyId">LOG IN WITH YOUR BARANGGAY ID</label>
+                                   <label for="brgyId">LOG IN WITH YOUR BARANGGAY ID <span style="color:red;">*</span></label>
                                     <input type="text" id="brgyId" placeholder="e.g. 2024-POSXI-9209" required>
                                     <div class="error-message" id="brgyIdError">Invalid format. Only letters, numbers, and hyphens allowed.</div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="password">PASSWORD</label>
+                                    <label for="password">PASSWORD <span style="color:red;">*</span></label>
                                     <div style="position: relative;">
                                         <input type="password" id="password" placeholder="Enter your Password" required>
                                         <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2; font-size: 1rem; min-width: 18px; min-height: 18px; display: block;"></i>
@@ -103,11 +103,11 @@
                                     <span>ADMIN ACCESS</span>
                                 </div>
                                 <div class="form-group">
-                                    <label for="adminId">ADMIN ID</label>
+                                    <label for="adminId">ADMIN ID <span style="color:red;">*</span></label>
                                     <input type="text" id="adminId" placeholder="e.g. ADMIN-BRGY21-001" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="adminPassword">PASSWORD</label>
+                                    <label for="adminPassword">PASSWORD <span style="color:red;">*</span></label>
                                     <div style="position: relative;">
                                         <input type="password" id="adminPassword" placeholder="Enter admin password" required>
                                         <i class="fa-solid fa-eye-slash" id="toggleAdminPassword" style="position: absolute; right: 15px; top: 12px; color: #aaa; cursor: pointer; z-index: 2;"></i>
@@ -292,9 +292,9 @@
                             <div class="form-grid">
                                 <div style="grid-column: 1; display: flex; flex-direction: column; gap: 15px;">
                                     <div class="section-title" style="margin-bottom: 0;">PET INFORMATION</div>
-                                    <div class="form-group"><label>PET NAME</label><input type="text" id="petName" class="no-digits" maxlength="15"></div>
+                                    <div class="form-group"><label>PET NAME <span style="color:red;">*</span></label><input type="text" id="petName" class="no-digits" maxlength="15"></div>
                                     <div class="form-group">
-                                        <label>DATE OF BIRTH</label>
+                                        <label>DATE OF BIRTH <span style="color:red;">*</span></label>
                                         <input type="date" id="petDOB">
                                     </div>
                                 </div>
@@ -310,25 +310,25 @@
                                     <button type="button" id="removePetPhotoBtn" class="btn btn-cancel" style="display:none; margin-top:10px; width:100%; padding: 5px;">Remove Photo</button>
                                 </div>
                                 <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                    <div class="form-group"><label>AGE (Human Years)</label><input type="text" id="petAge" class="only-numbers" readonly></div>
-                                    <div class="form-group"><label>WEIGHT (kg)</label><input type="text" id="petWeight" class="only-numbers" maxlength="3" pattern="[0-9]{1,3}" title="Up to 3 digits only"></div>
+                                    <div class="form-group"><label>AGE (Human Years) <span style="color:red;">*</span></label><input type="text" id="petAge" class="only-numbers" readonly></div>
+                                    <div class="form-group"><label>WEIGHT (kg) <span style="color:red;">*</span></label><input type="text" id="petWeight" class="only-numbers" maxlength="3" pattern="[0-9]{1,3}" title="Up to 3 digits only"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label>SEX</label>
+                                    <label>SEX <span style="color:red;">*</span></label>
                                     <div class="checkbox-group-inline">
                                         <label class="checkbox-label"><input type="checkbox" name="petSex" value="Male" class="single-checkbox"> MALE</label>
                                         <label class="checkbox-label"><input type="checkbox" name="petSex" value="Female" class="single-checkbox"> FEMALE</label>
                                     </div>
                                 </div>
                                 <div class="form-group" style="grid-column: 2;">
-                                    <label>NEUTERED / SPAYED</label>
+                                    <label>NEUTERED / SPAYED <span style="color:red;">*</span></label>
                                     <div class="checkbox-group-inline">
                                         <label class="checkbox-label"><input type="checkbox" name="petNeutered" value="Yes" class="single-checkbox"> YES</label>
                                         <label class="checkbox-label"><input type="checkbox" name="petNeutered" value="No" class="single-checkbox"> NO</label>
                                     </div>
                                 </div>
                                 <div class="form-group" style="grid-column: span 2;">
-                                    <label>SPECIE</label>
+                                    <label>SPECIE <span style="color:red;">*</span></label>
                                     <div class="checkbox-group-inline" style="flex-wrap: wrap; gap: 10px;" id="speciesCheckboxGroup">
                                         <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Dog" class="single-checkbox-species"> Dog</label>
                                         <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Cat" class="single-checkbox-species"> Cat</label>
@@ -345,7 +345,7 @@
                                 <div class="form-group"><label>BREED</label><input type="text" id="petBreed" class="no-digits"></div>
                                 <div class="form-group full-width"><label>COLOR OR MARKINGS</label><input type="text" id="petColor" class="no-digits"></div>
                                 <div class="form-group full-width">
-                                    <label>VACCINATION STATUS</label>
+                                    <label>VACCINATION STATUS <span style="color:red;">*</span></label>
                                     <div class="vaccination-group">
                                         <button type="button" class="vac-btn active-vac" id="btnVac">VACCINATED</button>
                                         <button type="button" class="vac-btn" id="btnNotVac">NOT VACCINATED</button>
