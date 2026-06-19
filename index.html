@@ -73,23 +73,23 @@
                                 <button type="button" class="btn btn-outline btn-block mb-2" id="adminToggleBtn">ARE YOU AN OFFICIAL FROM BARANGGAY?</button>
                             </div>
 
-                            <div id="signUpFields" style="display: none;">
+                           <div id="signUpFields" style="display: none;">
                                 <div class="form-group">
-                                    <label>FIRST NAME</label>
-                                    <input type="text" id="signupFirstName" class="no-digits" required>
+                                    <label>FIRST NAME <span style="color:red;">*</span></label>
+                                    <input type="text" id="signupFirstName" class="no-digits" maxlength="15" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>LAST NAME</label>
-                                    <input type="text" id="signupLastName" class="no-digits" required>
+                                    <label>LAST NAME <span style="color:red;">*</span></label>
+                                    <input type="text" id="signupLastName" class="no-digits" maxlength="15" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>EMAIL ADDRESS</label>
+                                    <label>EMAIL ADDRESS <span style="color:red;">*</span></label>
                                     <input type="email" id="signupEmail" required>
                                     <div class="error-message" id="emailError">Invalid email. Please use @gmail.com, @yahoo.com, or @outlook.com.</div>
                                 </div>
                                 <div class="form-group">
-                                    <label>BARANGGAY ID</label>
-                                    <input type="text" id="signupBrgyId" placeholder="e.g. 2024-POSXI-9209" required>
+                                    <label>BARANGGAY ID <span style="color:red;">*</span></label>
+                                    <input type="text" id="signupBrgyId" placeholder="e.g. 2024-BRGYID-9209" required>
                                     <div class="error-message" id="signupBrgyIdError">Invalid format. e.g. 2024-POSXI-9209</div>
                                 </div>
                                 <button type="button" class="btn btn-primary btn-block mt-3" id="signUpSubmitBtn">SIGN UP</button>
