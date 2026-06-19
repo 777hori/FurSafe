@@ -88,11 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.value !== val) e.target.value = val;
         }
         
-        // 2. Numbers Only (Age, Contact, House No)
-        if (e.target.classList.contains('only-numbers') || e.target.classList.contains('numbers-only')) {
-            let val = e.target.value.replace(/[^0-9]/g, '');
-            if (e.target.value !== val) e.target.value = val;
-        }
+      if (e.target.classList.contains('only-numbers') || e.target.classList.contains('numbers-only')) {
+    let val = e.target.value.replace(/[^0-9]/g, '');
+    if (e.target.value !== val) e.target.value = val;
+}
+if (e.target.id === 'ownerContact') {
+    if (e.target.value.length > 0 && e.target.value.length < 11) {
+        e.target.style.borderColor = 'red';
+    } else {
+        e.target.style.borderColor = '';
+    }
+}
 
         // 3. No Symbols (Admin ID, basic titles)
         if (e.target.classList.contains('no-symbols')) {
