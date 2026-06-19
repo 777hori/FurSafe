@@ -1,4 +1,4 @@
 [[redirects]]
-  from = "/"
-  to = "/superadmin.html"
+  from = "/*"
+  to = "/:splat"
   status = 200
