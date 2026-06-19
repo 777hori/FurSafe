@@ -275,9 +275,9 @@
                                         <label class="checkbox-label"><input type="checkbox" name="ownerSex" value="Prefer not to say" class="single-checkbox"> PREFER NOT TO SAY</label>
                                     </div>
                                 </div>
-                                <div class="form-group"><label>HOUSE/LOT NUMBER <span>*</span></label><input type="text" id="ownerHouse" class="only-numbers" pattern="[0-9]+" title="Numbers only" required></div>
-                                <div class="form-group"><label>STREET NAME <span>*</span></label><input type="text" id="ownerStreet" class="letters-only" required></div>
-                                <div class="form-group full-width"><label>SUBDIVISION/VILLAGE</label><input type="text" id="ownerPhase" class="letters-only" maxlength="50"></div>
+                                <div class="form-group"><label>HOUSE/LOT NUMBER <span>*</span></label><input type="text" id="ownerHouse" class="only-numbers" pattern="[0-9]+" title="Numbers only" required maxlength="7"></div>
+                                <div class="form-group"><label>STREET NAME <span>*</span></label><input type="text" id="ownerStreet" class="letters-only" required maxlength="20"></div>
+                                <div class="form-group full-width"><label>SUBDIVISION/VILLAGE</label><input type="text" id="ownerPhase" class="letters-only" maxlength="25"></div>
                                 <div class="form-group full-width"><label>EMAIL ADDRESS <span>*</span></label><input type="email" id="ownerEmail" required></div>
                             </div>
                         </div>
@@ -292,7 +292,7 @@
                             <div class="form-grid">
                                 <div style="grid-column: 1; display: flex; flex-direction: column; gap: 15px;">
                                     <div class="section-title" style="margin-bottom: 0;">PET INFORMATION</div>
-                                    <div class="form-group"><label>PET NAME <span style="color:red;">*</span></label><input type="text" id="petName" class="no-digits" maxlength="15"></div>
+                                    <div class="form-group"><label>PET NAME <span style="color:red;">*</span></label><input type="text" id="petName" class="no-digits no-dash" maxlength="15"></div>
                                     <div class="form-group">
                                         <label>DATE OF BIRTH <span style="color:red;">*</span></label>
                                         <input type="date" id="petDOB">
@@ -339,11 +339,11 @@
                                         <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Birds" class="single-checkbox-species"> Birds</label>
                                         <label class="checkbox-label"><input type="checkbox" name="petSpeciesCb" value="Others" class="single-checkbox-species"> Others</label>
                                     </div>
-                                    <input type="text" id="petSpeciesOther" class="no-digits" placeholder="Specify other species" style="display:none; margin-top:10px; width:100%;" maxlength="25">
+                                    <input type="text" id="petSpeciesOther" class="no-digits no-dash" placeholder="Specify other species" style="display:none; margin-top:10px; width:100%;" maxlength="25">
                                     <input type="hidden" id="petSpecies">
                                 </div>
-                                <div class="form-group"><label>BREED</label><input type="text" id="petBreed" class="no-digits"></div>
-                                <div class="form-group full-width"><label>COLOR OR MARKINGS</label><input type="text" id="petColor" class="no-digits"></div>
+                                <div class="form-group"><label>BREED</label><input type="text" id="petBreed" class="no-digits no-dash" maxlength="25"></div>
+                                <div class="form-group full-width"><label>COLOR OR MARKINGS</label><input type="text" id="petColor" class="no-digits no-dash" maxlength="25"></div>
                                 <div class="form-group full-width">
                                     <label>VACCINATION STATUS <span style="color:red;">*</span></label>
                                     <div class="vaccination-group">
