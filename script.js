@@ -1,3 +1,48 @@
+// ==========================================
+// XSS PROTECTION -- escape any user-typed text
+// before inserting it into innerHTML anywhere.
+// Always wrap user-generated strings with this.
+// ==========================================
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ==========================================
+// STYLED CONFIRM MODAL -- replaces window.confirm()
+// Returns a Promise<boolean>. Usage: await confirmModal('Delete this?')
+// ==========================================
+function confirmModal(message, confirmLabel = 'Confirm') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;max-width:380px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 12px;font-size:1.1rem;color:#222;">Please Confirm</h3>
+                <p style="margin:0 0 20px;color:#555;font-size:0.95rem;">${escapeHtml(message)}</p>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button id="confirmModalCancel" style="padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;">Cancel</button>
+                    <button id="confirmModalOk" style="padding:8px 16px;border-radius:8px;border:none;background:#e74c3c;color:#fff;cursor:pointer;font-weight:600;">${escapeHtml(confirmLabel)}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#confirmModalCancel').addEventListener('click', () => {
+            overlay.remove();
+            resolve(false);
+        });
+        overlay.querySelector('#confirmModalOk').addEventListener('click', () => {
+            overlay.remove();
+            resolve(true);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
@@ -367,6 +412,58 @@ if (e.target.id === 'ownerContact') {
     }
 
     // ==========================================
+    // SIGN-UP password strength + confirm match
+    // ==========================================
+    const signupPasswordInput = document.getElementById('signupPassword');
+    const signupConfirmPasswordInput = document.getElementById('signupConfirmPassword');
+    const signupPasswordStrengthEl = document.getElementById('signupPasswordStrength');
+    const passwordStrengthRegex = {
+        upper: /[A-Z]/,
+        lower: /[a-z]/,
+        digit: /[0-9]/,
+        special: /[^A-Za-z0-9]/
+    };
+
+    function getPasswordStrength(pwd) {
+        if (!pwd) return { score: 0, label: '', valid: false };
+        const hasUpper = passwordStrengthRegex.upper.test(pwd);
+        const hasLower = passwordStrengthRegex.lower.test(pwd);
+        const hasDigit = passwordStrengthRegex.digit.test(pwd);
+        const hasSpecial = passwordStrengthRegex.special.test(pwd);
+        const longEnough = pwd.length >= 8;
+        const passedCount = [hasUpper, hasLower, hasDigit, hasSpecial].filter(Boolean).length;
+        const valid = longEnough && hasUpper && hasLower && hasDigit && hasSpecial;
+
+        let label = 'Weak';
+        let score = 1;
+        if (longEnough && passedCount >= 4) { label = 'Strong'; score = 3; }
+        else if (longEnough && passedCount === 3) { label = 'Fair'; score = 2; }
+        else if (longEnough && passedCount <= 2) { label = 'Weak'; score = 1; }
+        else { label = 'Too short'; score = 0; }
+
+        return { score, label, valid };
+    }
+
+    if (signupPasswordInput && signupPasswordStrengthEl) {
+        signupPasswordInput.addEventListener('input', () => {
+            const pwd = signupPasswordInput.value;
+            const { label, score } = getPasswordStrength(pwd);
+            const colors = ['#999', '#e74c3c', '#e6a020', '#2ecc71'];
+            signupPasswordStrengthEl.textContent = pwd ? `Strength: ${label}` : '';
+            signupPasswordStrengthEl.style.color = colors[score] || '#999';
+            document.getElementById('signupPasswordError')?.classList.remove('visible');
+            signupPasswordInput.classList.remove('input-error');
+        });
+    }
+
+    if (signupConfirmPasswordInput) {
+        signupConfirmPasswordInput.addEventListener('input', () => {
+            document.getElementById('signupConfirmPasswordError')?.classList.remove('visible');
+            signupConfirmPasswordInput.classList.remove('input-error');
+        });
+    }
+
+    // ==========================================
     // SIGN-UP SUBMIT — validate brgy_id against DB
     // ==========================================
     const signUpSubmitBtn = document.getElementById('signUpSubmitBtn');
@@ -378,14 +475,47 @@ if (e.target.id === 'ownerContact') {
             const lastName = document.getElementById('signupLastName')?.value.trim();
             const email = document.getElementById('signupEmail')?.value.trim();
             const brgyIdVal = signupBrgyIdInput?.value.trim().toUpperCase();
+            const password = document.getElementById('signupPassword')?.value;
+            const confirmPassword = document.getElementById('signupConfirmPassword')?.value;
 
             // Clear previous errors
             if (signupBrgyIdError) signupBrgyIdError.classList.remove('visible');
             if (emailErrorEl) emailErrorEl.classList.remove('visible');
 
             // Basic presence check
-            if (!firstName || !lastName || !email || !brgyIdVal) {
+            if (!firstName || !lastName || !email || !brgyIdVal || !password || !confirmPassword) {
                 alert('Please fill in all fields.');
+                return;
+            }
+
+            // Password strength check
+            const strength = getPasswordStrength(password);
+            if (!strength.valid) {
+                document.getElementById('signupPassword')?.classList.add('input-error');
+                const pwdErr = document.getElementById('signupPasswordError');
+                if (pwdErr) pwdErr.classList.add('visible');
+                return;
+            }
+
+            // Password cannot contain the user's name or email
+            const lowerPwd = password.toLowerCase();
+            if ((firstName && lowerPwd.includes(firstName.toLowerCase())) ||
+                (lastName && lowerPwd.includes(lastName.toLowerCase())) ||
+                (email && lowerPwd.includes(email.split('@')[0].toLowerCase()))) {
+                document.getElementById('signupPassword')?.classList.add('input-error');
+                const pwdErr = document.getElementById('signupPasswordError');
+                if (pwdErr) {
+                    pwdErr.textContent = 'Password cannot contain your name or email.';
+                    pwdErr.classList.add('visible');
+                }
+                return;
+            }
+
+            // Confirm password match
+            if (password !== confirmPassword) {
+                document.getElementById('signupConfirmPassword')?.classList.add('input-error');
+                const confErr = document.getElementById('signupConfirmPasswordError');
+                if (confErr) confErr.classList.add('visible');
                 return;
             }
 
@@ -460,10 +590,10 @@ if (e.target.id === 'ownerContact') {
                     return;
                 }
 
-              // 2. Create Supabase auth user with email + a default password (brgy_id)
+              // 2. Create Supabase auth user with the password the user chose
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
-                    password: brgyIdVal, // default password = their brgy ID; they can change later
+                    password: password,
                     options: {
                         data: { first_name: firstName, last_name: lastName, brgy_id: brgyIdVal }
                     }
@@ -512,7 +642,7 @@ if (e.target.id === 'ownerContact') {
                 // 4. Show success
                 const successModal = document.getElementById('successModal');
                 const successMsg = document.getElementById('successModalMessage');
-                if (successMsg) successMsg.textContent = `Welcome, ${firstName}! Your account has been created. Your default password is your Barangay ID. Please log in.`;
+                if (successMsg) successMsg.textContent = `Welcome, ${firstName}! Your account has been created. Please log in with the password you set.`;
                 if (successModal) successModal.classList.add('active');
 
                 // Reset form and go back to login
@@ -521,6 +651,9 @@ if (e.target.id === 'ownerContact') {
                 document.getElementById('signupFirstName').value = '';
                 document.getElementById('signupLastName').value = '';
                 document.getElementById('signupEmail').value = '';
+                document.getElementById('signupPassword').value = '';
+                document.getElementById('signupConfirmPassword').value = '';
+                if (signupPasswordStrengthEl) signupPasswordStrengthEl.textContent = '';
                 signupBrgyIdInput.value = '';
 
             } catch (err) {
@@ -557,6 +690,21 @@ if (e.target.id === 'ownerContact') {
             loginSubmitBtn.disabled = true;
             loginSubmitBtn.textContent = 'Logging in...';
 
+            // ==========================================
+            // LOGIN LOCKOUT — block after 5 failed attempts for 15 min
+            // ==========================================
+            const lockoutKey = `fursafe_lockout_${brgyIdVal}`;
+            const lockoutRaw = localStorage.getItem(lockoutKey);
+            const lockoutData = lockoutRaw ? JSON.parse(lockoutRaw) : { attempts: 0, lockedUntil: 0 };
+
+            if (lockoutData.lockedUntil && Date.now() < lockoutData.lockedUntil) {
+                const minsLeft = Math.ceil((lockoutData.lockedUntil - Date.now()) / 60000);
+                alert(`Too many failed attempts. Please try again in ${minsLeft} minute(s).`);
+                loginSubmitBtn.disabled = false;
+                loginSubmitBtn.textContent = 'LOG IN';
+                return;
+            }
+
             try {
                 // Look up the email stored in valid_brgy_ids for this brgy_id
                 const { data: idRecord, error: idLookupError } = await supabase
@@ -588,9 +736,21 @@ if (e.target.id === 'ownerContact') {
                 });
 
                 if (loginError) {
-                    alert('Incorrect password. Please try again.');
+                    lockoutData.attempts = (lockoutData.attempts || 0) + 1;
+                    if (lockoutData.attempts >= 5) {
+                        lockoutData.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+                        lockoutData.attempts = 0;
+                        localStorage.setItem(lockoutKey, JSON.stringify(lockoutData));
+                        alert('Too many failed attempts. Your account is locked for 15 minutes.');
+                    } else {
+                        localStorage.setItem(lockoutKey, JSON.stringify(lockoutData));
+                        alert(`Incorrect password. Please try again. (${5 - lockoutData.attempts} attempt(s) left before lockout)`);
+                    }
                     return;
                 }
+
+                // Successful login — clear lockout counter
+                localStorage.removeItem(lockoutKey);
 
                 // --- BAN CHECK: verify profile is_active ---
                 const { data: profileCheck, error: profileCheckErr } = await supabase
@@ -692,7 +852,7 @@ if (e.target.id === 'ownerContact') {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to sign out?')) {
+            if (await confirmModal('Are you sure you want to sign out?', 'Sign Out')) {
                 try {
                     await supabase.auth.signOut();
                     
@@ -815,18 +975,7 @@ if (e.target.id === 'ownerContact') {
                     console.error('[FurSafe] Admin login error:', adminError);
                     alert('Error checking admin credentials. Check console.');
                 } else if (!adminData) {
-                    // FALLBACK: If RLS is blocking the read or table is empty, allow the hardcoded test account
-                    if (adminId === 'ADMIN-FURSAFE-001' && password === 'adminfursafe01') {
-                        localStorage.setItem('fursafe_admin', JSON.stringify({
-                            admin_login_id: 'ADMIN-FURSAFE-001',
-                            name: 'Abigail Mapue',
-                            role: 'Admin',
-                            barangay: 'Barangay 21'
-                        }));
-                        window.location.href = 'admin.html';
-                    } else {
-                        alert('Invalid Admin ID or Password.');
-                    }
+                    alert('Invalid Admin ID or Password.');
                 } else if (!adminData.is_active) {
                     alert('This admin account is currently inactive.');
                 } else {
@@ -862,8 +1011,15 @@ if (e.target.id === 'ownerContact') {
         petPhotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+                petPhotoInput.value = '';
+                return;
+            }
             if (file.size > 5 * 1024 * 1024) {
                 alert('File too large. Please upload an image under 5MB.');
+                petPhotoInput.value = '';
                 return;
             }
             const reader = new FileReader();
@@ -902,6 +1058,17 @@ if (e.target.id === 'ownerContact') {
         avatarFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload a JPG, PNG, or WEBP image.');
+                avatarFileInput.value = '';
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File too large. Please upload an image under 2MB.');
+                avatarFileInput.value = '';
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const src = ev.target.result;
@@ -1793,7 +1960,7 @@ if (e.target.id === 'ownerContact') {
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div class="post-avatar">${avatarHtml}</div>
                         <div>
-                            <div class="post-author">${authorName}</div>
+                            <div class="post-author">${escapeHtml(authorName)}</div>
                             <div style="font-size:0.75rem;color:var(--text-light);">${timeAgo} ${catBadges}</div>
                         </div>
                     </div>
@@ -1802,7 +1969,7 @@ if (e.target.id === 'ownerContact') {
                         <i class="fa-solid fa-flag" style="color:var(--text-light);cursor:pointer;font-size:0.9rem;" title="Report post" data-report-post="${post.id}"></i>
                     </div>
                 </div>
-                <div class="post-content" style="padding:10px 0;">${post.content}</div>
+                <div class="post-content" style="padding:10px 0;">${escapeHtml(post.content)}</div>
                 ${post.image_url ? `<div style="margin-bottom:10px;"><img src="${post.image_url}" style="width:100%;max-height:400px;object-fit:cover;border-radius:8px;"></div>` : ''}
                 <div class="post-actions">
                     <button class="action-btn like-btn ${isLiked ? 'liked' : ''}" data-like-post="${post.id}" style="${isLiked ? 'color:var(--primary);font-weight:600;' : ''}">
@@ -1930,7 +2097,7 @@ if (e.target.id === 'ownerContact') {
         // Delete post buttons
         document.querySelectorAll('[data-delete-post]').forEach(btn => {
             btn.addEventListener('click', async function() {
-                if (!confirm('Are you sure you want to delete this post?')) return;
+                if (!(await confirmModal('Are you sure you want to delete this post?', 'Delete Post'))) return;
                 const postId = this.getAttribute('data-delete-post');
 
                 // Delete associated likes and comments first
@@ -2011,9 +2178,9 @@ if (e.target.id === 'ownerContact') {
             div.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f0f0f0;';
             div.innerHTML = `
                 <div style="flex:1;">
-                    <strong style="font-size:0.8rem;">${cName}</strong>
+                    <strong style="font-size:0.8rem;">${escapeHtml(cName)}</strong>
                     <span style="font-size:0.7rem;color:var(--text-light);margin-left:6px;">${getTimeAgo(c.created_at)}</span>
-                    <p style="font-size:0.85rem;margin:2px 0 0;">${c.content}</p>
+                    <p style="font-size:0.85rem;margin:2px 0 0;">${escapeHtml(c.content)}</p>
                 </div>
                 ${isOwn ? `<i class="fa-solid fa-trash" style="color:#e74c3c;cursor:pointer;font-size:0.75rem;margin-left:8px;" data-delete-comment="${c.id}" data-comment-post="${postId}"></i>` : ''}
             `;
