@@ -1,3 +1,47 @@
+// ==========================================
+// XSS PROTECTION -- escape any user-typed text
+// before inserting it into innerHTML anywhere.
+// ==========================================
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ==========================================
+// STYLED CONFIRM MODAL — replaces window.confirm()
+// Returns a Promise<boolean>. Usage: await confirmModal('Delete this?')
+// ==========================================
+function confirmModal(message, confirmLabel = 'Confirm Delete') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;max-width:380px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 12px;font-size:1.1rem;color:#222;">Please Confirm</h3>
+                <p style="margin:0 0 20px;color:#555;font-size:0.95rem;">${escapeHtml(message)}</p>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button id="confirmModalCancel" style="padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;">Cancel</button>
+                    <button id="confirmModalOk" style="padding:8px 16px;border-radius:8px;border:none;background:#e74c3c;color:#fff;cursor:pointer;font-weight:600;">${escapeHtml(confirmLabel)}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#confirmModalCancel').addEventListener('click', () => {
+            overlay.remove();
+            resolve(false);
+        });
+        overlay.querySelector('#confirmModalOk').addEventListener('click', () => {
+            overlay.remove();
+            resolve(true);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
@@ -667,8 +711,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!currentViewingPetId) return;
             modalApproveBtn.disabled = true;
             try {
+                const { data: petRow } = await supabase.from('pets').select('pet_name, owner_name').eq('id', currentViewingPetId).maybeSingle();
                 const { error } = await supabase.from('pets').update({ vaccination_status: 'Approved' }).eq('id', currentViewingPetId);
                 if (error) throw error;
+
+                const adminSession = JSON.parse(localStorage.getItem('fursafe_admin') || '{}');
+                try {
+                    await supabase.from('admin_logs').insert({
+                        admin_id: adminSession.admin_login_id || null,
+                        action: 'approve_pet',
+                        target_id: currentViewingPetId,
+                        target_type: 'pet',
+                        details: 'Approved pet registration: ' + (petRow?.pet_name || currentViewingPetId) + (petRow?.owner_name ? ' (' + petRow.owner_name + ')' : ''),
+                        barangay: adminSession.barangay || 'BRGY 21'
+                    });
+                } catch (logErr) {
+                    console.error('[FurSafe Admin] Audit log failed:', logErr);
+                }
+
                 // Refresh cache
                 await fetchAllPets();
                 renderPetTable();
@@ -685,10 +745,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalRejectBtn) {
         modalRejectBtn.addEventListener('click', async () => {
             if (!currentViewingPetId) return;
+            if (!(await confirmModal('Reject this pet registration?', 'Reject'))) return;
             modalRejectBtn.disabled = true;
             try {
+                const { data: petRow } = await supabase.from('pets').select('pet_name, owner_name').eq('id', currentViewingPetId).maybeSingle();
                 const { error } = await supabase.from('pets').update({ vaccination_status: 'Rejected' }).eq('id', currentViewingPetId);
                 if (error) throw error;
+
+                const adminSession = JSON.parse(localStorage.getItem('fursafe_admin') || '{}');
+                try {
+                    await supabase.from('admin_logs').insert({
+                        admin_id: adminSession.admin_login_id || null,
+                        action: 'reject_pet',
+                        target_id: currentViewingPetId,
+                        target_type: 'pet',
+                        details: 'Rejected pet registration: ' + (petRow?.pet_name || currentViewingPetId) + (petRow?.owner_name ? ' (' + petRow.owner_name + ')' : ''),
+                        barangay: adminSession.barangay || 'BRGY 21'
+                    });
+                } catch (logErr) {
+                    console.error('[FurSafe Admin] Audit log failed:', logErr);
+                }
+
                 await fetchAllPets();
                 renderPetTable();
                 petViewModal.classList.remove('active');
@@ -867,9 +944,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 annCard.setAttribute('data-ann-time', ann.created_at);
                 annCard.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +
-                    '<div class="ann-title">' + ann.title + '</div>' +
-                    '<div class="ann-content">' + actualContent + '</div>' +
-                    '<div class="ann-meta">Posted by ' + author + ' | ' + humanDate(ann.created_at) + '</div>' +
+                    '<div class="ann-title">' + escapeHtml(ann.title) + '</div>' +
+                    '<div class="ann-content">' + escapeHtml(actualContent) + '</div>' +
+                    '<div class="ann-meta">Posted by ' + escapeHtml(author) + ' | ' + humanDate(ann.created_at) + '</div>' +
                     '</div>' +
                     '<button class="btn-delete-ann" data-ann-time="' + ann.created_at + '" style="background:#e74c3c;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.8rem;flex-shrink:0;margin-left:12px;"><i class="fa-solid fa-trash"></i> Delete</button>' +
                     '</div>';
@@ -879,7 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Attach delete handlers
             announcementsFeed.querySelectorAll('.btn-delete-ann').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    if (!confirm('Delete this announcement? It will also disappear from the user website.')) return;
+                    if (!(await confirmModal('Delete this announcement? It will also disappear from the user website.'))) return;
                     const annTime = btn.getAttribute('data-ann-time');
                     btn.disabled = true;
                     btn.textContent = 'Deleting...';
@@ -955,7 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Attach handlers
             list.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    if (!confirm('Are you sure you want to delete this post?')) return;
+                    if (!(await confirmModal('Are you sure you want to delete this post?'))) return;
                     const reportId = btn.getAttribute('data-report-id');
                     const postId = btn.getAttribute('data-post-id');
                     try {
