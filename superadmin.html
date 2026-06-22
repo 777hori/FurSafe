@@ -1242,6 +1242,50 @@ body {
 
 <script>
 // ==========================================
+// XSS PROTECTION -- escape any user-typed text
+// before inserting it into innerHTML anywhere.
+// ==========================================
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ==========================================
+// STYLED CONFIRM MODAL -- replaces window.confirm()
+// Returns a Promise<boolean>. Usage: await confirmModal('Delete this?')
+// ==========================================
+function confirmModal(message, confirmLabel = 'Confirm') {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:24px;max-width:380px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 12px;font-size:1.1rem;color:#222;">Please Confirm</h3>
+                <p style="margin:0 0 20px;color:#555;font-size:0.95rem;">${escapeHtml(message)}</p>
+                <div style="display:flex;justify-content:flex-end;gap:10px;">
+                    <button id="confirmModalCancel" style="padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;">Cancel</button>
+                    <button id="confirmModalOk" style="padding:8px 16px;border-radius:8px;border:none;background:#e74c3c;color:#fff;cursor:pointer;font-weight:600;">${escapeHtml(confirmLabel)}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('#confirmModalCancel').addEventListener('click', () => {
+            overlay.remove();
+            resolve(false);
+        });
+        overlay.querySelector('#confirmModalOk').addEventListener('click', () => {
+            overlay.remove();
+            resolve(true);
+        });
+    });
+}
+
+// ==========================================
 // UNIVERSAL STRICT VALIDATION ENGINE
 // ==========================================
 document.addEventListener('input', (e) => {
@@ -1580,7 +1624,7 @@ async function loadAdminManagement() {
             <div class="admin-item">
                 <div class="avatar-circle ${avColor}">${initials}</div>
                 <div class="admin-info">
-                    <strong>${sa.name}${isSelf ? ' (You)' : ''}</strong>
+                    <strong>${escapeHtml(sa.name)}${isSelf ? ' (You)' : ''}</strong>
                     <span>SUPER ADMIN · FURSAFE-001 · BRGY 21</span>
                 </div>
                 <div class="badges-row">
@@ -1599,8 +1643,8 @@ async function loadAdminManagement() {
             <div class="admin-item" id="admin-row-${a.admin_login_id}">
                 <div class="avatar-circle ${avColor}">${initials}</div>
                 <div class="admin-info">
-                    <strong>${a.name}</strong>
-                    <span>ADMIN · ${a.admin_login_id} · ${a.barangay || 'BRGY 21'}</span>
+                    <strong>${escapeHtml(a.name)}</strong>
+                    <span>ADMIN &middot; ${escapeHtml(a.admin_login_id)} &middot; ${escapeHtml(a.barangay || 'BRGY 21')}</span>
                 </div>
                 <div class="badges-row">
                     <span class="badge badge-admin">Admin</span>
@@ -1620,6 +1664,20 @@ async function loadAdminManagement() {
 async function toggleAdmin(loginId, currentlyActive) {
     const newActive = !currentlyActive;
     const newStatus = newActive ? 'active' : 'deactivated';
+
+    // HIERARCHY LOCK: block deactivating the last remaining active Admin
+    if (!newActive) {
+        const { count: activeCount, error: countErr } = await sb.from('admin_accounts')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_active', true);
+
+        if (!countErr && (activeCount === null || activeCount <= 1)) {
+            showToast('You cannot deactivate the last remaining Admin account.', true);
+            return;
+        }
+
+        if (!(await confirmModal('Deactivate this Admin account? They will lose access immediately.', 'Deactivate'))) return;
+    }
 
     const { error } = await sb.from('admin_accounts')
         .update({ is_active: newActive, status: newStatus })
@@ -1717,8 +1775,8 @@ async function loadUserManagement() {
             <div class="user-item">
                 <div class="avatar-circle ${avColor}">${initials}</div>
                 <div class="user-info">
-                    <strong>${name.trim() || 'Unknown'}</strong>
-                    <span>${posId} · Brgy 21 pet</span>
+                    <strong>${escapeHtml(name.trim() || 'Unknown')}</strong>
+                    <span>${escapeHtml(posId)} &middot; Brgy 21 pet</span>
                 </div>
                 <div class="user-actions">
                     ${isBanned
@@ -1733,6 +1791,8 @@ async function loadUserManagement() {
 }
 
 async function banUser(userId) {
+    if (!(await confirmModal('Ban this user? They will lose access to their account immediately.', 'Ban User'))) return;
+
     const { error } = await sb.from('profiles').update({ is_active: false }).eq('id', userId);
     if (error) { showToast('Failed to ban user.', true); return; }
 
