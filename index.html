@@ -92,6 +92,17 @@
                                     <input type="text" id="signupBrgyId" placeholder="e.g. 2024-BRGYID-9209" required>
                                     <div class="error-message" id="signupBrgyIdError">Invalid format. e.g. 2024-POSXI-9209</div>
                                 </div>
+                                <div class="form-group">
+                                    <label>PASSWORD <span style="color:red;">*</span></label>
+                                    <input type="password" id="signupPassword" required>
+                                    <div id="signupPasswordStrength" style="font-size:0.8rem; margin-top:4px; font-weight:600;"></div>
+                                    <div class="error-message" id="signupPasswordError">Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.</div>
+                                </div>
+                                <div class="form-group">
+                                    <label>CONFIRM PASSWORD <span style="color:red;">*</span></label>
+                                    <input type="password" id="signupConfirmPassword" required>
+                                    <div class="error-message" id="signupConfirmPasswordError">Passwords do not match.</div>
+                                </div>
                                 <button type="button" class="btn btn-primary btn-block mt-3" id="signUpSubmitBtn">SIGN UP</button>
                                 <button type="button" class="btn btn-outline btn-block mt-2" id="backToLoginBtn">BACK TO LOGIN</button>
                             </div>
